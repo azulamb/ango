@@ -1,0 +1,2 @@
+interface AngoElement extends HTMLElement {
+}
