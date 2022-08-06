@@ -58,7 +58,7 @@ const Morse = {
 					':host > div { display: flex; align-items: center; justify-content: center; gap: calc(0.4 * var(--size)); }',
 					':host > div > div { --card: var(--main); width: var(--card); height: calc(1.5 * var(--card)); }',
 					':host > div > div:first-child, :host > div > div:last-child { --card: var(--side); }',
-					':host > div > div > div { display: grid; grid-template-rows: var(--card) calc(0.5 * var(--card)); border: 1px solid black; text-align: center; border-radius: calc(0.4 * var(--size)); cursor: pointer; pointer-events: auto; user-select: none; }',
+					':host > div > div > div { display: grid; grid-template-rows: var(--card) calc(0.5 * var(--card)); border: 1px solid black; text-align: center; border-radius: calc(0.4 * var(--size)); cursor: pointer; pointer-events: auto; user-select: none; overflow: hidden; }',
 					':host > div > div > div > div:first-child { font-size: var(--card); line-height: var(--card); }',
 					':host > div > div > div > div:last-child { font-size: calc(0.5 * var(--card)); line-height: calc(0.5 * var(--card)); }',
 				].join('');
