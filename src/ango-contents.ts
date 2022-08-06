@@ -84,7 +84,7 @@ interface AngoContentsElement extends HTMLElement {
 				if (old !== page) {
 					const url = new URL(location.href);
 					url.search = new URLSearchParams({ page: page }).toString();
-					location.replace(url);
+					//location.replace(url);
 				}
 			}
 		},
