@@ -51,6 +51,12 @@ interface AngoContentsElement extends HTMLElement {
 
 				shadow.appendChild(style);
 				shadow.appendChild(wrapper);
+
+				const params = new URLSearchParams(location.search);
+				const page = params.get('page');
+				if (page) {
+					this.page = page;
+				}
 			}
 
 			addContent(tag: string, name: string) {
@@ -69,7 +75,17 @@ interface AngoContentsElement extends HTMLElement {
 			}
 
 			set page(value) {
+				const old = this.page;
 				this.setAttribute('page', value || '');
+				if (location.protocol !== 'https:') {
+					return;
+				}
+				const page = this.page;
+				if (old !== page) {
+					const url = new URL(location.href);
+					url.search = new URLSearchParams({ page: page }).toString();
+					location.replace(url);
+				}
 			}
 		},
 	);
