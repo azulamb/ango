@@ -1,7 +1,7 @@
 {
   "name": "Hiroki Log",
   "short_name": "ango",
-  "start_url": "/",
+  "start_url": "/ango/",
   "icons": [{"src":"./favicon.svg","sizes":"any"}],
   "display": "standalone",
   "theme_color": "#e6e6e6"
