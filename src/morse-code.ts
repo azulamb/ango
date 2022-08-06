@@ -74,9 +74,9 @@ interface MorseCodeNode extends MorseNode {
 
 				const style = document.createElement('style');
 				style.innerHTML = [
-					':host { display: block; }',
+					':host { display: block; height: 100%; }',
 					`:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
-					':host > div { display: block; width: 100%; min-height: 100%; box-sizing: border-box; height: calc(100vh - var(--header)); display: grid; grid-template-rows: 1fr 3rem 3rem 20vh 25vmin; grid-template-columns: 1fr 6rem; grid-template-areas: "a a" "b c" "d c" "e e" "f f"; }',
+					':host > div { width: 100%; height: 100%; box-sizing: border-box; display: grid; grid-template-rows: 1fr 3rem 3rem 20vh 25vmin; grid-template-columns: 1fr 6rem; grid-template-areas: "a a" "b c" "d c" "e e" "f f"; }',
 					'svg { --dot: #2f48b7; --dash: #a731dd; --frame: #333; --char: #fff; width: 100%; height: 100%; grid-area: a; }',
 					'svg .selected { --dot: #d39e32; --dash: #d39e32; --frame: #9d7b36; }',
 					'svg path.dot { stroke: var(--dot); }',

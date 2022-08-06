@@ -82,7 +82,6 @@ interface AngoContentsElement extends HTMLElement {
 				const page = this.page;
 				const url = new URL(location.href);
 				url.searchParams.set('page', page);
-				//location.replace(url);
 				if (location.search !== url.search) {
 					location.search = url.search;
 				}
