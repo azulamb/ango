@@ -76,9 +76,9 @@ interface MorseCodeNode extends MorseNode {
 				style.innerHTML = [
 					':host { display: block; }',
 					`:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
-					':host > div { display: block; width: 100%; min-height: 100%; padding-bottom: 25vmin; box-sizing: border-box; height: calc(100vh - var(--header)); display: grid; grid-template-rows: 1fr 3rem 3rem 20vh; }',
-					'div.input { width: 100vmin; height: 25vmin; display: grid; grid-template-columns: 25vmin 25vmin 25vmin 25vmin; grid-template-rows: 25vmin; position: absolute; bottom: 0; left: 0; right: 0; margin: auto; overflow: hidden; }',
-					'div.input > button { font-size: 20vmin; padding: 0; line-height: 20vmin; }',
+					':host > div { display: block; width: 100%; min-height: 100%; box-sizing: border-box; height: calc(100vh - var(--header)); display: grid; grid-template-rows: 1fr 3rem 3rem 20vh 25vmin; }',
+					'div.input { width: 100%; height: 25vmin; display: flex; justify-content: center; overflow: hidden; }',
+					'div.input > button { font-size: 20vmin; padding: 0; line-height: 20vmin; width: 25vmin; height: 25vmin; box-sizing: border-box; }',
 					'svg { --dot: #2f48b7; --dash: #a731dd; --frame: #333; --char: #fff; width: 100%; height: 100%; }',
 					'svg .selected { --dot: #d39e32; --dash: #d39e32; --frame: #9d7b36; }',
 					'svg path.dot { stroke: var(--dot); }',
