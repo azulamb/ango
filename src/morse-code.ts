@@ -76,17 +76,19 @@ interface MorseCodeNode extends MorseNode {
 				style.innerHTML = [
 					':host { display: block; }',
 					`:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
-					':host > div { display: block; width: 100%; min-height: 100%; box-sizing: border-box; height: calc(100vh - var(--header)); display: grid; grid-template-rows: 1fr 3rem 3rem 20vh 25vmin; }',
-					'div.input { width: 100%; height: 25vmin; display: flex; justify-content: center; overflow: hidden; }',
-					'div.input > button { font-size: 20vmin; padding: 0; line-height: 20vmin; width: 25vmin; height: 25vmin; box-sizing: border-box; }',
-					'svg { --dot: #2f48b7; --dash: #a731dd; --frame: #333; --char: #fff; width: 100%; height: 100%; }',
+					':host > div { display: block; width: 100%; min-height: 100%; box-sizing: border-box; height: calc(100vh - var(--header)); display: grid; grid-template-rows: 1fr 3rem 3rem 20vh 25vmin; grid-template-columns: 1fr 6rem; grid-template-areas: "a a" "b c" "d c" "e e" "f f"; }',
+					'svg { --dot: #2f48b7; --dash: #a731dd; --frame: #333; --char: #fff; width: 100%; height: 100%; grid-area: a; }',
 					'svg .selected { --dot: #d39e32; --dash: #d39e32; --frame: #9d7b36; }',
 					'svg path.dot { stroke: var(--dot); }',
 					'svg path.dash { stroke: var(--dash); }',
 					'svg path.frame, svg circle.frame { fill: var(--frame); cursor: pointer; }',
 					'svg path.char { fill: var(--char); pointer-events: none; }',
-					'morse-preview { --size: 3vh; }',
 					'input[type="text"] { font-size: 3rem; width: 100%; box-sizing: border-box; }',
+					'.reset { grid-area: c; margin: 0; font-size: 4rem; line-height: 4rem; overflow: hidden; }',
+					'.preview { grid-area: e; }',
+					'morse-preview { --size: 3vh; }',
+					'div.inputs { width: 100%; height: 25vmin; display: flex; justify-content: center; overflow: hidden; grid-area: f; }',
+					'div.inputs > button { font-size: 20vmin; padding: 0; line-height: 20vmin; width: 25vmin; height: 25vmin; box-sizing: border-box; }',
 				].join('');
 
 				const codes = this.createSVG();
@@ -101,6 +103,7 @@ interface MorseCodeNode extends MorseNode {
 
 				const preview = document.createElement('div');
 				preview.appendChild(this.preview);
+				preview.classList.add('preview');
 
 				const remove = document.createElement('button');
 				remove.textContent = '⇦';
@@ -130,7 +133,7 @@ interface MorseCodeNode extends MorseNode {
 				enter.textContent = '↴';
 
 				const inputs = document.createElement('div');
-				inputs.classList.add('input');
+				inputs.classList.add('inputs');
 				inputs.appendChild(remove);
 				inputs.appendChild(dot);
 				inputs.appendChild(dash);
@@ -154,9 +157,18 @@ interface MorseCodeNode extends MorseNode {
 					this.changeFromText();
 				});
 
+				const reset = document.createElement('button');
+				reset.classList.add('reset');
+				reset.textContent = '↻';
+				reset.addEventListener('click', () => {
+					this.morse.value = '';
+					this.text.value = '';
+				});
+
 				const contents = document.createElement('div');
 				contents.appendChild(this.svg);
 				contents.appendChild(this.morse);
+				contents.appendChild(reset);
 				contents.appendChild(this.text);
 				contents.appendChild(preview);
 				contents.appendChild(inputs);
