@@ -470,9 +470,9 @@ const Morse = {
             const shadow = this.attachShadow({ mode: 'open' });
             const style = document.createElement('style');
             style.innerHTML = [
-                ':host { display: block; }',
+                ':host { display: block; height: 100%; }',
                 `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
-                ':host > div { display: block; width: 100%; min-height: 100%; box-sizing: border-box; height: calc(100vh - var(--header)); display: grid; grid-template-rows: 1fr 3rem 3rem 20vh 25vmin; grid-template-columns: 1fr 6rem; grid-template-areas: "a a" "b c" "d c" "e e" "f f"; }',
+                ':host > div { width: 100%; height: 100%; box-sizing: border-box; display: grid; grid-template-rows: 1fr 3rem 3rem 20vh 25vmin; grid-template-columns: 1fr 6rem; grid-template-areas: "a a" "b c" "d c" "e e" "f f"; }',
                 'svg { --dot: #2f48b7; --dash: #a731dd; --frame: #333; --char: #fff; width: 100%; height: 100%; grid-area: a; }',
                 'svg .selected { --dot: #d39e32; --dash: #d39e32; --frame: #9d7b36; }',
                 'svg path.dot { stroke: var(--dot); }',
@@ -964,6 +964,57 @@ const Morse = {
 });
 customElements.whenDefined('ango-contents.ts').then(() => {
 });
-if (location.protocol === 'https:' && 'serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
+class ServiceWorkerManager {
+    static enable() {
+        localStorage.removeItem('sw:disable');
+    }
+    static disable() {
+        localStorage.setItem('sw:disable', 'true');
+    }
+    static isEnable() {
+        return location.protocol === 'https:' &&
+            localStorage.getItem('sw:disable') !== null &&
+            'serviceWorker' in navigator;
+    }
+    static registered() {
+        if (!this.isEnable()) {
+            return Promise.reject(new Error('Cannot register ServiceWorker.'));
+        }
+        return navigator.serviceWorker.getRegistrations().then((registrations) => {
+            return 0 < registrations.length;
+        });
+    }
+    static register() {
+        if (this.isEnable()) {
+            return navigator.serviceWorker.register('./sw.js');
+        }
+        return Promise.reject(new Error('Cannot register ServiceWorker.'));
+    }
+    static async unregister() {
+        if (!this.isEnable()) {
+            return Promise.reject(new Error('Cannot register ServiceWorker.'));
+        }
+        await navigator.serviceWorker.getRegistrations().then((registrations) => {
+            let count = 0;
+            for (const registration of registrations) {
+                registration.unregister();
+                ++count;
+            }
+            console.log(`Unregister ServiceWorker(${count})`);
+        });
+        await caches.keys().then(function (keys) {
+            return Promise.all(keys.map((cacheName) => {
+                if (cacheName) {
+                    console.log(`Delete cache: ${cacheName}`);
+                    return caches.delete(cacheName);
+                }
+                return Promise.resolve();
+            })).then(() => {
+                console.log('Delete caches complete!');
+            }).catch((error) => {
+                console.error(error);
+            });
+        });
+    }
 }
+ServiceWorkerManager.register();
