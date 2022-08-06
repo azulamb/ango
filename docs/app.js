@@ -55,16 +55,15 @@
             return this.getAttribute('page') || '';
         }
         set page(value) {
-            const old = this.page;
-            this.setAttribute('page', value || '');
-            if (location.protocol !== 'https:') {
+            if (this.page === value) {
                 return;
             }
+            this.setAttribute('page', value || '');
             const page = this.page;
-            if (old !== page) {
-                const url = new URL(location.href);
-                url.search = new URLSearchParams({ page: page }).toString();
-                location.replace(url);
+            const url = new URL(location.href);
+            url.searchParams.set('page', page);
+            if (location.search !== url.search) {
+                location.search = url.search;
             }
         }
     });
