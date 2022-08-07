@@ -1,5 +1,9 @@
+interface AngoElement extends HTMLElement {
+	readonly name: string;
+}
+
 interface AngoContentsElement extends HTMLElement {
-	addContent(tag: string, name: string): void;
+	addContent(tag: string, content: AngoElement): void;
 	page: string;
 }
 
@@ -59,15 +63,35 @@ interface AngoContentsElement extends HTMLElement {
 				}
 			}
 
-			addContent(tag: string, name: string) {
+			addContent(tag: string, content: AngoElement) {
 				const option = document.createElement('option');
 				option.value = tag;
-				option.textContent = name;
+				option.textContent = content.name;
 				if (this.page === tag) {
 					option.selected = true;
 				}
 
 				this.menu.appendChild(option);
+
+				// Sort options.
+				const names: string[] = [];
+				for (const child of this.children) {
+					const name = (<AngoElement> child).name;
+					if (name) {
+						names.push(name);
+					}
+				}
+
+				const options: HTMLOptionElement[] = [];
+				for (const option of this.menu.children) {
+					options.push(<HTMLOptionElement> option);
+				}
+				options.sort((a, b) => {
+					return names.indexOf(a.textContent || '') - names.indexOf(b.textContent || '');
+				});
+				for (const option of options) {
+					this.menu.appendChild(option);
+				}
 			}
 
 			get page() {
@@ -75,15 +99,27 @@ interface AngoContentsElement extends HTMLElement {
 			}
 
 			set page(value) {
+				if (value === 'ango-config') {
+					value = '';
+				}
 				if (this.page === value) {
 					return;
 				}
-				this.setAttribute('page', value || '');
-				const page = this.page;
-				const url = new URL(location.href);
-				url.searchParams.set('page', page);
-				if (location.search !== url.search) {
-					location.search = url.search;
+				if (value) {
+					this.setAttribute('page', value);
+					const page = this.page;
+					const url = new URL(location.href);
+					url.searchParams.set('page', page);
+					if (location.search !== url.search) {
+						location.search = url.search;
+					}
+				} else {
+					this.removeAttribute('page');
+					const url = new URL(location.href);
+					url.searchParams.delete('page');
+					if (location.search !== url.search) {
+						location.search = url.search;
+					}
 				}
 			}
 		},

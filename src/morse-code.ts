@@ -58,14 +58,19 @@ interface MorseCodeNode extends MorseNode {
 			return document.createElementNS('http://www.w3.org/2000/svg', 'g');
 		},
 	};
+
 	customElements.define(
 		tagname,
-		class MorseCode extends HTMLElement {
+		class MorseCode extends HTMLElement implements AngoElement {
 			protected root: MorseCodeNode;
 			protected svg: SVGElement;
 			protected morse: HTMLInputElement;
 			protected text: HTMLInputElement;
 			protected preview: MorsePreview;
+
+			get name() {
+				return 'Morse';
+			}
 
 			constructor() {
 				super();
@@ -176,7 +181,7 @@ interface MorseCodeNode extends MorseNode {
 				shadow.appendChild(style);
 				shadow.appendChild(contents);
 
-				(<AngoContentsElement> this.parentElement).addContent(tagname, 'Morse');
+				(<AngoContentsElement> this.parentElement).addContent(tagname, this);
 			}
 
 			protected changeFromMorse() {

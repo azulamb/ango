@@ -19,8 +19,13 @@
 	}
 	customElements.define(
 		tagname,
-		class extends HTMLElement {
+		class extends HTMLElement implements AngoElement {
 			protected table: HTMLTableElement;
+
+			get name() {
+				return 'ASCII';
+			}
+
 			constructor() {
 				super();
 
@@ -163,7 +168,7 @@
 				shadow.appendChild(style);
 				shadow.appendChild(contents);
 
-				(<AngoContentsElement> this.parentElement).addContent(tagname, 'ASCII');
+				(<AngoContentsElement> this.parentElement).addContent(tagname, this);
 			}
 
 			protected select(x: number, y: number) {

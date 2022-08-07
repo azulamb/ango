@@ -1,3 +1,71 @@
+class ServiceWorkerManager {
+    static enable() {
+        localStorage.removeItem('sw:disable');
+    }
+    static disable() {
+        localStorage.setItem('sw:disable', 'true');
+    }
+    static toggle() {
+        if (this.disableUser()) {
+            this.enable();
+        }
+        else {
+            this.disable();
+        }
+        return !this.disableUser();
+    }
+    static isEnable() {
+        return location.protocol === 'https:' &&
+            this.disableUser() &&
+            'serviceWorker' in navigator;
+    }
+    static disableUser() {
+        return localStorage.getItem('sw:disable') !== null;
+    }
+    static registered() {
+        if (!this.isEnable()) {
+            return Promise.reject(new Error('Cannot register ServiceWorker.'));
+        }
+        return navigator.serviceWorker.getRegistrations().then((registrations) => {
+            if (0 < registrations.length) {
+                return Promise.resolve();
+            }
+            return Promise.reject(new Error('Unregister ServiceWorker.'));
+        });
+    }
+    static register() {
+        if (this.isEnable()) {
+            return navigator.serviceWorker.register('./sw.js');
+        }
+        return Promise.reject(new Error('Cannot register ServiceWorker.'));
+    }
+    static async unregister() {
+        if (!this.isEnable()) {
+            return Promise.reject(new Error('Cannot register ServiceWorker.'));
+        }
+        await navigator.serviceWorker.getRegistrations().then((registrations) => {
+            let count = 0;
+            for (const registration of registrations) {
+                registration.unregister();
+                ++count;
+            }
+            console.log(`Unregister ServiceWorker(${count})`);
+        });
+        await caches.keys().then(function (keys) {
+            return Promise.all(keys.map((cacheName) => {
+                if (cacheName) {
+                    console.log(`Delete cache: ${cacheName}`);
+                    return caches.delete(cacheName);
+                }
+                return Promise.resolve();
+            })).then(() => {
+                console.log('Delete caches complete!');
+            }).catch((error) => {
+                console.error(error);
+            });
+        });
+    }
+}
 ((script, init) => {
     if (document.readyState !== 'loading') {
         return init(script);
@@ -42,28 +110,58 @@
                 this.page = page;
             }
         }
-        addContent(tag, name) {
+        addContent(tag, content) {
             const option = document.createElement('option');
             option.value = tag;
-            option.textContent = name;
+            option.textContent = content.name;
             if (this.page === tag) {
                 option.selected = true;
             }
             this.menu.appendChild(option);
+            const names = [];
+            for (const child of this.children) {
+                const name = child.name;
+                if (name) {
+                    names.push(name);
+                }
+            }
+            const options = [];
+            for (const option of this.menu.children) {
+                options.push(option);
+            }
+            options.sort((a, b) => {
+                return names.indexOf(a.textContent || '') - names.indexOf(b.textContent || '');
+            });
+            for (const option of options) {
+                this.menu.appendChild(option);
+            }
         }
         get page() {
             return this.getAttribute('page') || '';
         }
         set page(value) {
+            if (value === 'ango-config') {
+                value = '';
+            }
             if (this.page === value) {
                 return;
             }
-            this.setAttribute('page', value || '');
-            const page = this.page;
-            const url = new URL(location.href);
-            url.searchParams.set('page', page);
-            if (location.search !== url.search) {
-                location.search = url.search;
+            if (value) {
+                this.setAttribute('page', value);
+                const page = this.page;
+                const url = new URL(location.href);
+                url.searchParams.set('page', page);
+                if (location.search !== url.search) {
+                    location.search = url.search;
+                }
+            }
+            else {
+                this.removeAttribute('page');
+                const url = new URL(location.href);
+                url.searchParams.delete('page');
+                if (location.search !== url.search) {
+                    location.search = url.search;
+                }
             }
         }
     });
@@ -89,6 +187,9 @@
     }
     customElements.define(tagname, class extends HTMLElement {
         table;
+        get name() {
+            return 'ASCII';
+        }
         constructor() {
             super();
             const shadow = this.attachShadow({ mode: 'open' });
@@ -204,7 +305,7 @@
             contents.appendChild(inputs);
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, 'ASCII');
+            this.parentElement.addContent(tagname, this);
         }
         select(x, y) {
             for (const element of this.table.querySelectorAll('.selected')) {
@@ -465,6 +566,9 @@ const Morse = {
         morse;
         text;
         preview;
+        get name() {
+            return 'Morse';
+        }
         constructor() {
             super();
             const shadow = this.attachShadow({ mode: 'open' });
@@ -557,7 +661,7 @@ const Morse = {
             contents.appendChild(inputs);
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, 'Morse');
+            this.parentElement.addContent(tagname, this);
         }
         changeFromMorse() {
             this.text.value = this.morse.value.split(' ').map((morse) => {
@@ -962,59 +1066,91 @@ const Morse = {
         }
     });
 });
+((script, init) => {
+    if (document.readyState !== 'loading') {
+        return init(script);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        init(script);
+    });
+})(document.currentScript, (script) => {
+    const tagname = 'ango-config';
+    if (customElements.get(tagname)) {
+        return;
+    }
+    const DL = {
+        dt: (title) => {
+            const dt = document.createElement('dt');
+            dt.textContent = title;
+            return dt;
+        },
+        dd: (content) => {
+            const dd = document.createElement('dd');
+            if (typeof content === 'string') {
+                dd.textContent = content;
+            }
+            else {
+                dd.appendChild(content);
+            }
+            return dd;
+        },
+        button: (text, callback) => {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.addEventListener('click', callback);
+            return button;
+        },
+    };
+    customElements.define(tagname, class extends HTMLElement {
+        get name() {
+            return 'Config';
+        }
+        constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; }',
+                `:host-context(ango-contents[page]) { display: none; }`,
+                'h1 { display: block; width: 4rem; height: 4rem; background: center no-repeat url(./favicon.svg); margin: 0.5rem auto; overflow: hidden; text-indent: 8rem; }',
+                'div, p { font-size: 1rem; margin: 0.5rem auto; width: 100%; max-width: 40rem; }',
+            ].join('');
+            const h1 = document.createElement('h1');
+            h1.textContent = 'ango';
+            const detail = document.createElement('p');
+            detail.textContent = '何らかの謎解き系の暗号解読に使えそうなツール群です。';
+            const dl = document.createElement('dl');
+            dl.appendChild(DL.dt('Remove ServiceWorker.'));
+            dl.appendChild(DL.dd(DL.button('Remove', () => {
+                ServiceWorkerManager.unregister();
+            })));
+            dl.appendChild(DL.dt('Register ServiceWorker.'));
+            dl.appendChild(DL.dd(DL.button('Register', () => {
+                ServiceWorkerManager.register();
+            })));
+            function updateSwitch(enable) {
+                switchTitle.textContent = `Switch ServiceWorker. [${enable ? 'Enable' : 'Disable'}]`;
+                switchSW.textContent = enable ? 'Deactivate' : 'Activate';
+            }
+            const switchTitle = DL.dt('Switch ServiceWorker.');
+            const switchSW = DL.button('', () => {
+                updateSwitch(ServiceWorkerManager.toggle());
+            });
+            updateSwitch(!ServiceWorkerManager.disableUser());
+            dl.appendChild(switchTitle);
+            dl.appendChild(DL.dd(switchSW));
+            const config = document.createElement('div');
+            config.appendChild(dl);
+            const contents = document.createElement('div');
+            contents.appendChild(h1);
+            contents.appendChild(detail);
+            contents.appendChild(config);
+            shadow.appendChild(style);
+            shadow.appendChild(contents);
+            this.parentElement.addContent(tagname, this);
+        }
+    });
+});
 customElements.whenDefined('ango-contents.ts').then(() => {
 });
-class ServiceWorkerManager {
-    static enable() {
-        localStorage.removeItem('sw:disable');
-    }
-    static disable() {
-        localStorage.setItem('sw:disable', 'true');
-    }
-    static isEnable() {
-        return location.protocol === 'https:' &&
-            localStorage.getItem('sw:disable') !== null &&
-            'serviceWorker' in navigator;
-    }
-    static registered() {
-        if (!this.isEnable()) {
-            return Promise.reject(new Error('Cannot register ServiceWorker.'));
-        }
-        return navigator.serviceWorker.getRegistrations().then((registrations) => {
-            return 0 < registrations.length;
-        });
-    }
-    static register() {
-        if (this.isEnable()) {
-            return navigator.serviceWorker.register('./sw.js');
-        }
-        return Promise.reject(new Error('Cannot register ServiceWorker.'));
-    }
-    static async unregister() {
-        if (!this.isEnable()) {
-            return Promise.reject(new Error('Cannot register ServiceWorker.'));
-        }
-        await navigator.serviceWorker.getRegistrations().then((registrations) => {
-            let count = 0;
-            for (const registration of registrations) {
-                registration.unregister();
-                ++count;
-            }
-            console.log(`Unregister ServiceWorker(${count})`);
-        });
-        await caches.keys().then(function (keys) {
-            return Promise.all(keys.map((cacheName) => {
-                if (cacheName) {
-                    console.log(`Delete cache: ${cacheName}`);
-                    return caches.delete(cacheName);
-                }
-                return Promise.resolve();
-            })).then(() => {
-                console.log('Delete caches complete!');
-            }).catch((error) => {
-                console.error(error);
-            });
-        });
-    }
-}
 ServiceWorkerManager.register();
