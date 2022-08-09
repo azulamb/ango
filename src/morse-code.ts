@@ -18,46 +18,6 @@ interface MorseCodeNode extends MorseNode {
 	if (customElements.get(tagname)) {
 		return;
 	}
-	const SVG = {
-		create: (width: number, height: number) => {
-			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-			svg.setAttributeNS(null, 'width', `${width}px`);
-			svg.setAttributeNS(null, 'height', `${height}px`);
-			svg.setAttributeNS(null, 'viewBox', `0 0 ${width} ${height}`);
-			return svg;
-		},
-		path: (d: string, option?: { id?: string; class?: string }) => {
-			const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-			path.setAttributeNS(null, 'd', d);
-			if (option) {
-				if (option.id) {
-					path.id = option.id;
-				}
-				if (option.class) {
-					path.classList.add(option.class);
-				}
-			}
-			return path;
-		},
-		circle: (cx: number, cy: number, option?: { id?: string; class?: string }) => {
-			const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-			circle.setAttributeNS(null, 'cx', cx + '');
-			circle.setAttributeNS(null, 'cy', cy + '');
-			circle.setAttributeNS(null, 'r', '3');
-			if (option) {
-				if (option.id) {
-					circle.id = option.id;
-				}
-				if (option.class) {
-					circle.classList.add(option.class);
-				}
-			}
-			return circle;
-		},
-		g: () => {
-			return document.createElementNS('http://www.w3.org/2000/svg', 'g');
-		},
-	};
 
 	customElements.define(
 		tagname,
@@ -106,47 +66,37 @@ interface MorseCodeNode extends MorseNode {
 					this.addChar(this.preview.char);
 				});
 
-				const preview = document.createElement('div');
-				preview.appendChild(this.preview);
+				const preview = Common.div(this.preview).get();
 				preview.classList.add('preview');
 
-				const remove = document.createElement('button');
-				remove.textContent = '⇦';
-				remove.addEventListener('click', () => {
+				const remove = Common.button('⇦', () => {
 					this.preview.remove();
 					this.updateMorse();
-				});
+				}).get();
 
-				const dot = document.createElement('button');
-				dot.textContent = '・';
-				dot.addEventListener('click', () => {
+				const dot = Common.button('・', () => {
 					this.preview.dot();
 					this.updateMorse();
-				});
+				}).get();
 
-				const dash = document.createElement('button');
-				dash.textContent = '－';
-				dash.addEventListener('click', () => {
+				const dash = Common.button('－', () => {
 					this.preview.dash();
 					this.updateMorse();
-				});
+				}).get();
 
-				const enter = document.createElement('button');
-				enter.addEventListener('click', () => {
+				const enter = Common.button('↴', () => {
 					this.addChar(this.preview.char);
-				});
-				enter.textContent = '↴';
+				}).get();
 
-				const inputs = document.createElement('div');
+				const inputs = Common.div(
+					remove,
+					dot,
+					dash,
+					enter,
+				).get();
 				inputs.classList.add('inputs');
-				inputs.appendChild(remove);
-				inputs.appendChild(dot);
-				inputs.appendChild(dash);
-				inputs.appendChild(enter);
 
-				this.morse = document.createElement('input');
-				this.morse.type = 'text';
-				this.morse.placeholder = 'Morse code. (. -)';
+				this.morse = Common.inputText('Morse code. (. -)').get();
 				this.morse.addEventListener('input', () => {
 					this.morse.value = this.morse.value
 						.replace(/\s+/g, ' ')
@@ -155,28 +105,24 @@ interface MorseCodeNode extends MorseNode {
 					this.changeFromMorse();
 				});
 
-				this.text = document.createElement('input');
-				this.text.type = 'text';
-				this.text.placeholder = 'Text.';
+				this.text = Common.inputText('Text.').get();
 				this.text.addEventListener('input', () => {
 					this.changeFromText();
 				});
 
-				const reset = document.createElement('button');
-				reset.classList.add('reset');
-				reset.textContent = '↻';
-				reset.addEventListener('click', () => {
+				const reset = Common.button('🗑', () => {
 					this.morse.value = '';
 					this.text.value = '';
-				});
+				}).get({class: 'reset'});
 
-				const contents = document.createElement('div');
-				contents.appendChild(this.svg);
-				contents.appendChild(this.morse);
-				contents.appendChild(reset);
-				contents.appendChild(this.text);
-				contents.appendChild(preview);
-				contents.appendChild(inputs);
+				const contents = Common.div(
+					this.svg,
+					this.morse,
+					reset,
+					this.text,
+					preview,
+					inputs,
+				).get();
 
 				shadow.appendChild(style);
 				shadow.appendChild(contents);
@@ -291,8 +237,8 @@ interface MorseCodeNode extends MorseNode {
 			protected createSVG() {
 				const codes: { [keys: string]: MorseCodeNode } = {};
 
-				const routes = SVG.g();
-				const frames = SVG.g();
+				const routes = Common.g();
+				const frames = Common.g();
 
 				[
 					{
@@ -449,10 +395,10 @@ interface MorseCodeNode extends MorseNode {
 					},
 					{ key: '_2', route: 'm44 56 7-4', cx: 51, cy: 52, char: '' }, // empty 2
 				].forEach((data) => {
-					const route = SVG.path(data.route, { class: 'dot' });
+					const route = Common.path(data.route).get({ class: 'dot' });
 					routes.appendChild(route);
 
-					const frame = SVG.circle(data.cx, data.cy, { class: 'frame' });
+					const frame = Common.circle(data.cx, data.cy, 3).get({ class: 'frame' });
 					frames.appendChild(frame);
 					if (!data.key.includes('_')) {
 						frame.addEventListener('click', () => {
@@ -461,7 +407,7 @@ interface MorseCodeNode extends MorseNode {
 					}
 
 					if (data.char) {
-						const char = SVG.path(data.char, { class: 'char' });
+						const char = Common.path(data.char).get({ class: 'char' });
 						frames.appendChild(char);
 					}
 
@@ -602,10 +548,10 @@ interface MorseCodeNode extends MorseNode {
 					{ key: '_1', route: 'm20 24-7 4', frame: 'm12 25c-1.6569 0-3 1.3431-3 3s1.3431 3 3 3h2c1.6569 0 3-1.3431 3-3s-1.3431-3-3-3z', char: '' }, // empty 1
 					{ key: '_3', route: 'm44 56 7 4', frame: 'm50 57c-1.6568 0-3 1.3432-3 3s1.3432 3 3 3h2c1.6568 0 3-1.3432 3-3s-1.3432-3-3-3z', char: '' }, // empty 3
 				].forEach((data) => {
-					const route = SVG.path(data.route, { class: 'dash' });
+					const route = Common.path(data.route).get({ class: 'dash' });
 					routes.appendChild(route);
 
-					const frame = SVG.path(<string> data.frame, { class: 'frame' });
+					const frame = Common.path(<string> data.frame).get({ class: 'frame' });
 					frames.appendChild(frame);
 					if (!data.key.includes('_')) {
 						frame.addEventListener('click', () => {
@@ -614,7 +560,7 @@ interface MorseCodeNode extends MorseNode {
 					}
 
 					if (data.char) {
-						const char = SVG.path(data.char, { class: 'char' });
+						const char = Common.path(data.char).get({ class: 'char' });
 						char.id = `char_${data.key}`;
 						frames.appendChild(char);
 					}
@@ -634,9 +580,9 @@ interface MorseCodeNode extends MorseNode {
 					};
 				});
 
-				frames.appendChild(SVG.path('m32 30-2 2 2 2 2-2z', { class: 'frame' }));
+				frames.appendChild(Common.path('m32 30-2 2 2 2 2-2z').get({ class: 'frame' }));
 
-				this.svg = SVG.create(64, 64);
+				this.svg = Common.svg(64, 64).get();
 				this.svg.appendChild(routes);
 				this.svg.appendChild(frames);
 

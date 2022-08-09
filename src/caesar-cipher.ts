@@ -10,20 +10,7 @@
 	if (customElements.get(tagname)) {
 		return;
 	}
-	function createTr(...tds: HTMLTableCellElement[]) {
-		const tr = document.createElement('tr');
-		for (const td of tds) {
-			tr.appendChild(td);
-		}
-		return tr;
-	}
-	function createTd(text?: string) {
-		const td = document.createElement('td');
-		if (text) {
-			td.textContent = text;
-		}
-		return td;
-	}
+
 	customElements.define(
 		tagname,
 		class extends HTMLElement implements AngoElement {
@@ -62,76 +49,67 @@
 					':host(:not([mode="cipher"])) #encryption, :host([mode="cipher"]) #decryption { background: #c3d0e5; }',
 				].join('');
 
-				this.baseRow = createTr();
-				this.convertRow = createTr();
-				this.centerColumn = createTd();
+				this.baseRow = Common.tr().get();
+				this.convertRow = Common.tr().get();
+				this.centerColumn = Common.td().get();
 
-				const table = document.createElement('table');
-				table.appendChild(this.baseRow);
-				table.appendChild(createTr(this.centerColumn));
-				table.appendChild(this.convertRow);
+				const table = Common.table(
+					this.baseRow,
+					Common.tr(this.centerColumn).get(),
+					this.convertRow,
+				).get();
 
-				const sub = document.createElement('button');
-				sub.textContent = '<';
-				sub.addEventListener('click', () => {
+				const sub = Common.button('<', () => {
 					this.shift.value = `${parseInt(this.shift.value) - 1}`;
 					this.updateTable();
-				});
-				const add = document.createElement('button');
-				add.textContent = '>';
-				add.addEventListener('click', () => {
+				}).get();
+				const add = Common.button('>', () => {
 					this.shift.value = `${parseInt(this.shift.value) + 1}`;
 					this.updateTable();
-				});
-				this.shift = document.createElement('input');
-				this.shift.type = 'number';
+				}).get();
+				this.shift = Common.inputNumber().get();
 				this.shift.step = '1';
 				this.shift.addEventListener('input', () => {
 					this.updateTable();
 				});
 
-				const controller = document.createElement('div');
-				controller.appendChild(sub);
-				controller.appendChild(this.shift);
-				controller.appendChild(add);
+				const controller = Common.div(
+					sub,
+					this.shift,
+					add,
+				).get();
 
 				this.centerColumn.appendChild(controller);
 
-				this.rawText = document.createElement('textarea');
-				this.rawText.placeholder = 'Text.';
+				this.rawText = Common.textarea('Text.').get();
 				this.rawText.addEventListener('input', () => {
 					this.encrypt();
 				});
 
-				this.cipherText = document.createElement('textarea');
-				this.cipherText.placeholder = 'Cipher text.';
+				this.cipherText = Common.textarea('Cipher text.').get();
 				this.cipherText.addEventListener('input', () => {
 					this.decrypt();
 				});
 
-				const encryption = document.createElement('button');
-				encryption.textContent = '>';
-				encryption.id = 'encryption';
-				encryption.addEventListener('click', () => {
+				const encryption = Common.button('>', () => {
 					this.encrypt();
-				});
+				}).get({id: 'encryption'});
 
-				const decryption = document.createElement('button');
-				decryption.textContent = '<';
-				decryption.id = 'decryption';
-				decryption.addEventListener('click', () => {
+				const decryption = Common.button('<', () => {
 					this.decrypt();
-				});
+				}).get({id: 'decryption'});
 
-				const convertArea = document.createElement('div');
-				convertArea.appendChild(this.rawText);
-				convertArea.appendChild(encryption);
-				convertArea.appendChild(decryption);
-				convertArea.appendChild(this.cipherText);
+				const convertArea = Common.div(
+					this.rawText,
+					encryption,
+					decryption,
+					this.cipherText,
+				).get();
 
-				const contents = document.createElement('div');
-				contents.appendChild(convertArea);
-				contents.appendChild(table);
+				const contents = Common.div(
+					convertArea,
+					table,
+				).get();
 
 				shadow.appendChild(style);
 				shadow.appendChild(contents);
@@ -159,7 +137,7 @@
 					this.base = table;
 					this.baseRow.innerHTML = '';
 					for (const char of this.base) {
-						this.baseRow.appendChild(createTd(char));
+						this.baseRow.appendChild(Common.td(char).get());
 					}
 					this.centerColumn.colSpan = this.base.length;
 				}
@@ -171,7 +149,7 @@
 				for (let i = 0; i < this.base.length; ++i) {
 					const char = this.base[(i + shift) % this.base.length];
 					this.convert.push(char);
-					this.convertRow.appendChild(createTd(char));
+					this.convertRow.appendChild(Common.td(char).get());
 				}
 				if (this.mode === 'cipher') {
 					this.decrypt(false);

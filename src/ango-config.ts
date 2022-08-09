@@ -11,29 +11,6 @@
 		return;
 	}
 
-	const DL = {
-		dt: (title: string) => {
-			const dt = document.createElement('dt');
-			dt.textContent = title;
-			return dt;
-		},
-		dd: (content: string | HTMLElement) => {
-			const dd = document.createElement('dd');
-			if (typeof content === 'string') {
-				dd.textContent = content;
-			} else {
-				dd.appendChild(content);
-			}
-			return dd;
-		},
-		button: (text: string, callback: () => unknown) => {
-			const button = document.createElement('button');
-			button.textContent = text;
-			button.addEventListener('click', callback);
-			return button;
-		},
-	};
-
 	customElements.define(
 		tagname,
 		class extends HTMLElement {
@@ -56,37 +33,35 @@
 
 				const h1 = document.createElement('h1');
 				h1.textContent = 'ango';
-				const detail = document.createElement('p');
-				detail.textContent = '何らかの謎解き系の暗号解読に使えそうなツール群です。';
+				const detail = Common.p('何らかの謎解き系の暗号解読に使えそうなツール群です。').get();
 
-				const dl = document.createElement('dl');
+				const dl = Common.dl().get();
 
-				dl.appendChild(DL.dt('Remove ServiceWorker.'));
-				dl.appendChild(DL.dd(DL.button('Remove', () => {
+				dl.appendChild(Common.dt('Remove ServiceWorker.').get());
+				dl.appendChild(Common.dd(Common.button('Remove', () => {
 					ServiceWorkerManager.unregister();
-				})));
+				}).get()).get());
 
-				dl.appendChild(DL.dt('Register ServiceWorker.'));
-				dl.appendChild(DL.dd(DL.button('Register', () => {
+				dl.appendChild(Common.dt('Register ServiceWorker.').get());
+				dl.appendChild(Common.dd(Common.button('Register', () => {
 					ServiceWorkerManager.register();
-				})));
+				}).get()).get());
 
 				function updateSwitch(enable: boolean) {
 					switchTitle.textContent = `Switch ServiceWorker. [${enable ? 'Enable' : 'Disable'}]`;
 					switchSW.textContent = enable ? 'Deactivate' : 'Activate';
 				}
-				const switchTitle = DL.dt('Switch ServiceWorker.');
-				const switchSW = DL.button('', () => {
+				const switchTitle = Common.dt('Switch ServiceWorker.').get();
+				const switchSW = Common.button('', () => {
 					updateSwitch(ServiceWorkerManager.toggle());
-				});
+				}).get();
 				updateSwitch(!ServiceWorkerManager.disableUser());
 				dl.appendChild(switchTitle);
-				dl.appendChild(DL.dd(switchSW));
+				dl.appendChild(Common.dd(switchSW).get());
 
-				const config = document.createElement('div');
-				config.appendChild(dl);
+				const config = Common.div(dl).get();
 
-				const contents = document.createElement('div');
+				const contents = Common.div().get();
 				contents.appendChild(h1);
 				contents.appendChild(detail);
 				contents.appendChild(config);

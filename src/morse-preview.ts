@@ -63,16 +63,16 @@ const Morse = {
 					':host > div > div > div > div:last-child { font-size: calc(0.5 * var(--card)); line-height: calc(0.5 * var(--card)); }',
 				].join('');
 
-				this.previewDot = document.createElement('div');
-				this.previewDotMorse = document.createElement('div');
+				this.previewDot = Common.div().get();
+				this.previewDotMorse = Common.div().get();
 
-				this.previewDash = document.createElement('div');
-				this.previewDashMorse = document.createElement('div');
+				this.previewDash = Common.div().get();
+				this.previewDashMorse = Common.div().get();
 
-				this.previewNow = document.createElement('div');
-				this.previewNowMorse = document.createElement('div');
+				this.previewNow = Common.div().get();
+				this.previewNowMorse = Common.div().get();
 
-				const dot = document.createElement('div');
+				const dot = Common.div().get();
 				dot.appendChild(this.previewDot);
 				dot.appendChild(this.previewDotMorse);
 				dot.addEventListener('click', (event) => {
@@ -80,7 +80,7 @@ const Morse = {
 					this.dot();
 				});
 
-				const dash = document.createElement('div');
+				const dash = Common.div().get();
 				dash.appendChild(this.previewDash);
 				dash.appendChild(this.previewDashMorse);
 				dash.addEventListener('click', (event) => {
@@ -88,7 +88,7 @@ const Morse = {
 					this.dash();
 				});
 
-				const now = document.createElement('div');
+				const now = Common.div().get();
 				now.appendChild(this.previewNow);
 				now.appendChild(this.previewNowMorse);
 				now.addEventListener('contextmenu', (event) => {
@@ -97,14 +97,14 @@ const Morse = {
 					this.remove();
 				});
 
-				const cardPrev = document.createElement('div');
+				const cardPrev = Common.div().get();
 				cardPrev.appendChild(dot);
-				const cardDash = document.createElement('div');
+				const cardDash = Common.div().get();
 				cardDash.appendChild(dash);
-				const cardNow = document.createElement('div');
+				const cardNow = Common.div().get();
 				cardNow.appendChild(now);
 
-				const contents = document.createElement('div');
+				const contents = Common.div().get();
 				contents.appendChild(cardPrev);
 				contents.appendChild(cardNow);
 				contents.appendChild(cardDash);
