@@ -10,13 +10,7 @@
 	if (customElements.get(tagname)) {
 		return;
 	}
-	function createTd(text?: string) {
-		const td = document.createElement('td');
-		if (text) {
-			td.textContent = text;
-		}
-		return td;
-	}
+
 	customElements.define(
 		tagname,
 		class extends HTMLElement implements AngoElement {
@@ -56,31 +50,29 @@
 					':host > div > table .selected { background: rgba(82, 179, 116, 0.46); }',
 				].join('');
 
-				const tr = document.createElement('tr');
-				tr.appendChild(createTd());
+				const tr = Common.tr(Common.td().get()).get();
 				for (let i = 2; i <= 7; ++i) {
-					tr.appendChild(createTd(`0x${i}`));
+					tr.appendChild(Common.td(`0x${i}`).get());
 				}
-				const thead = document.createElement('thead');
-				thead.appendChild(tr);
+				const thead = Common.thead(tr).get();
 
-				this.table = document.createElement('table');
+				this.table = Common.table().get();
 				this.table.appendChild(thead);
 
 				for (let n = 0; n < 16; ++n) {
-					const tr = document.createElement('tr');
-					tr.appendChild(createTd(n.toString(16)));
+					const tr = Common.tr().get();
+					tr.appendChild(Common.td(n.toString(16)).get());
 					this.table.appendChild(tr);
 					for (let i = 2; i <= 7; ++i) {
 						const num = i * 16 + n;
 
-						const td = createTd();
+						const td = Common.td().get();
 
 						if (num < 127) {
-							const char = document.createElement('pre');
+							const char = Common.pre().get();
 							char.textContent = String.fromCharCode(num);
 
-							const charCode = document.createElement('div');
+							const charCode = Common.div().get();
 							charCode.innerHTML = `${num}<br>0x${num.toString(16)}`;
 
 							td.appendChild(char);
@@ -97,8 +89,7 @@
 					}
 				}
 
-				const code = document.createElement('input');
-				code.placeholder = 'Code';
+				const code = Common.inputText('Code').get();
 				code.addEventListener('input', () => {
 					const value = code.value.replace(/[^0-9a-fA-Fx]/g, '').replace(/0x/g, '');
 
@@ -120,8 +111,7 @@
 				});
 
 				// !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}\~
-				const text = document.createElement('input');
-				text.placeholder = 'Text';
+				const text = Common.inputText('Text.').get();
 				text.addEventListener('input', () => {
 					const value = text.value.replace(
 						/[^ \!\"\#\$\%\&\'\(\)\*\+\,\-\.\/0123456789\:\;\<\=\>\?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]\^\_\`abcdefghijklmnopqrstuvwxyz\{\|\}\~]/g,
@@ -135,16 +125,12 @@
 					}).join('');
 				});
 
-				const reset = document.createElement('button');
-				reset.textContent = '↻';
-				reset.addEventListener('click', () => {
+				const reset = Common.button('🗑', () => {
 					code.value = '';
 					text.value = '';
-				});
+				}).get();
 
-				const remove = document.createElement('button');
-				remove.textContent = '⇦';
-				remove.addEventListener('click', () => {
+				const remove = Common.button('⇦', () => {
 					const chars = text.value.split('');
 					chars.pop();
 					console.log(chars);
@@ -152,18 +138,20 @@
 					code.value = chars.map((char) => {
 						return `0x${char.charCodeAt(0).toString(16)}`;
 					}).join('');
-				});
+				}).get();
 
-				const inputs = document.createElement('div');
+				const inputs = Common.div(
+					reset,
+					code,
+					text,
+					remove,
+				).get();
 				inputs.classList.add('input');
-				inputs.appendChild(reset);
-				inputs.appendChild(code);
-				inputs.appendChild(text);
-				inputs.appendChild(remove);
 
-				const contents = document.createElement('div');
-				contents.appendChild(this.table);
-				contents.appendChild(inputs);
+				const contents = Common.div(
+					this.table,
+					inputs,
+				).get();
 
 				shadow.appendChild(style);
 				shadow.appendChild(contents);

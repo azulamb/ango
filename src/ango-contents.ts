@@ -38,7 +38,7 @@ interface AngoContentsElement extends HTMLElement {
 					':host > div > div { overflow: auto; }',
 				].join('');
 
-				this.menu = document.createElement('select');
+				this.menu = Common.select().get();
 				this.menu.addEventListener('change', () => {
 					this.page = this.menu.options[this.menu.selectedIndex].value;
 				});
@@ -46,12 +46,12 @@ interface AngoContentsElement extends HTMLElement {
 				const header = document.createElement('header');
 				header.appendChild(this.menu);
 
-				const contents = document.createElement('div');
-				contents.appendChild(document.createElement('slot'));
+				const contents = Common.div(document.createElement('slot')).get();
 
-				const wrapper = document.createElement('div');
-				wrapper.appendChild(header);
-				wrapper.appendChild(contents);
+				const wrapper = Common.div(
+					header,
+					contents,
+				).get();
 
 				shadow.appendChild(style);
 				shadow.appendChild(wrapper);
@@ -67,7 +67,7 @@ interface AngoContentsElement extends HTMLElement {
 				const option = document.createElement('option');
 				option.value = tag;
 				option.textContent = content.name;
-				if (this.page === tag) {
+				if (this.page === tag||(this.page === '' && tag ==='ango-config')) {
 					option.selected = true;
 				}
 

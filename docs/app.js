@@ -1,15 +1,172 @@
-class Common {
-    static toLowerCase(str) {
-        return str.replace(/[A-Z]/g, (char) => {
-            return String.fromCharCode(char.charCodeAt(0) | 32);
-        });
+const Common = (() => {
+    function option(element) {
+        return {
+            get: (option) => {
+                if (option) {
+                    if (option.id) {
+                        element.id = option.id;
+                    }
+                    if (option.class) {
+                        const names = typeof option.class === 'string' ? [option.class] : option.class;
+                        for (const name of names) {
+                            element.classList.add(name);
+                        }
+                    }
+                }
+                return element;
+            },
+        };
     }
-    static toUpperCase(str) {
-        return str.replace(/[a-z]/g, (char) => {
-            return String.fromCharCode(char.charCodeAt(0) & ~32);
-        });
-    }
-}
+    return class {
+        static toLowerCase(str) {
+            return str.replace(/[A-Z]/g, (char) => {
+                return String.fromCharCode(char.charCodeAt(0) | 32);
+            });
+        }
+        static toUpperCase(str) {
+            return str.replace(/[a-z]/g, (char) => {
+                return String.fromCharCode(char.charCodeAt(0) & ~32);
+            });
+        }
+        static div(...children) {
+            const div = document.createElement('div');
+            for (const child of children) {
+                div.appendChild(child);
+            }
+            return option(div);
+        }
+        static p(...children) {
+            const p = document.createElement('p');
+            for (const child of children) {
+                if (typeof child === 'string') {
+                    p.appendChild(document.createTextNode(child));
+                }
+                else {
+                    p.appendChild(child);
+                }
+            }
+            return option(p);
+        }
+        static pre() {
+            const pre = document.createElement('pre');
+            return option(pre);
+        }
+        static table(...children) {
+            const table = document.createElement('table');
+            for (const child of children) {
+                table.appendChild(child);
+            }
+            return option(table);
+        }
+        static thead(content) {
+            const thead = document.createElement('thead');
+            if (content) {
+                thead.appendChild(content);
+            }
+            return option(thead);
+        }
+        static tr(...tds) {
+            const tr = document.createElement('tr');
+            for (const td of tds) {
+                tr.appendChild(td);
+            }
+            return option(tr);
+        }
+        static td(content) {
+            const td = document.createElement('td');
+            if (content) {
+                if (typeof content === 'string') {
+                    td.textContent = content;
+                }
+                else {
+                    td.appendChild(content);
+                }
+            }
+            return option(td);
+        }
+        static dl(...children) {
+            const dl = document.createElement('dl');
+            for (const child of children) {
+                dl.appendChild(child);
+            }
+            return option(dl);
+        }
+        static dt(title) {
+            const dt = document.createElement('dt');
+            dt.textContent = title;
+            return option(dt);
+        }
+        static dd(content) {
+            const dd = document.createElement('dd');
+            if (typeof content === 'string') {
+                dd.textContent = content;
+            }
+            else {
+                dd.appendChild(content);
+            }
+            return option(dd);
+        }
+        static button(text, callback) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.addEventListener('click', callback);
+            return option(button);
+        }
+        static textarea(placeholder) {
+            const textarea = document.createElement('textarea');
+            if (placeholder) {
+                textarea.placeholder = placeholder;
+            }
+            return option(textarea);
+        }
+        static input() {
+            const input = document.createElement('input');
+            return option(input);
+        }
+        static inputText(placeholder) {
+            const input = this.input();
+            input.get().type = 'text';
+            if (placeholder) {
+                input.get().placeholder = placeholder;
+            }
+            return input;
+        }
+        static inputNumber() {
+            const input = this.input();
+            input.get().type = 'number';
+            return input;
+        }
+        static select(...options) {
+            const select = document.createElement('select');
+            for (const child of options) {
+                select.appendChild(child);
+            }
+            return option(select);
+        }
+        static svg(width, height) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttributeNS(null, 'width', `${width}px`);
+            svg.setAttributeNS(null, 'height', `${height}px`);
+            svg.setAttributeNS(null, 'viewBox', `0 0 ${width} ${height}`);
+            return option(svg);
+        }
+        static path(d) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttributeNS(null, 'd', d);
+            return option(path);
+        }
+        static circle(cx, cy, r) {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttributeNS(null, 'cx', cx + '');
+            circle.setAttributeNS(null, 'cy', cy + '');
+            circle.setAttributeNS(null, 'r', r + '');
+            return option(circle);
+        }
+        static g() {
+            return document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        }
+    };
+})();
 class ServiceWorkerManager {
     static enable() {
         localStorage.removeItem('sw:disable');
@@ -103,17 +260,14 @@ class ServiceWorkerManager {
                 ':host > div > header > select { font-size: var(--header); border: none; outline: none; }',
                 ':host > div > div { overflow: auto; }',
             ].join('');
-            this.menu = document.createElement('select');
+            this.menu = Common.select().get();
             this.menu.addEventListener('change', () => {
                 this.page = this.menu.options[this.menu.selectedIndex].value;
             });
             const header = document.createElement('header');
             header.appendChild(this.menu);
-            const contents = document.createElement('div');
-            contents.appendChild(document.createElement('slot'));
-            const wrapper = document.createElement('div');
-            wrapper.appendChild(header);
-            wrapper.appendChild(contents);
+            const contents = Common.div(document.createElement('slot')).get();
+            const wrapper = Common.div(header, contents).get();
             shadow.appendChild(style);
             shadow.appendChild(wrapper);
             const params = new URLSearchParams(location.search);
@@ -126,7 +280,7 @@ class ServiceWorkerManager {
             const option = document.createElement('option');
             option.value = tag;
             option.textContent = content.name;
-            if (this.page === tag) {
+            if (this.page === tag || (this.page === '' && tag === 'ango-config')) {
                 option.selected = true;
             }
             this.menu.appendChild(option);
@@ -190,13 +344,6 @@ class ServiceWorkerManager {
     if (customElements.get(tagname)) {
         return;
     }
-    function createTd(text) {
-        const td = document.createElement('td');
-        if (text) {
-            td.textContent = text;
-        }
-        return td;
-    }
     customElements.define(tagname, class extends HTMLElement {
         table;
         get name() {
@@ -229,26 +376,24 @@ class ServiceWorkerManager {
                 'div.input button:last-child { grid-area: c; }',
                 ':host > div > table .selected { background: rgba(82, 179, 116, 0.46); }',
             ].join('');
-            const tr = document.createElement('tr');
-            tr.appendChild(createTd());
+            const tr = Common.tr(Common.td().get()).get();
             for (let i = 2; i <= 7; ++i) {
-                tr.appendChild(createTd(`0x${i}`));
+                tr.appendChild(Common.td(`0x${i}`).get());
             }
-            const thead = document.createElement('thead');
-            thead.appendChild(tr);
-            this.table = document.createElement('table');
+            const thead = Common.thead(tr).get();
+            this.table = Common.table().get();
             this.table.appendChild(thead);
             for (let n = 0; n < 16; ++n) {
-                const tr = document.createElement('tr');
-                tr.appendChild(createTd(n.toString(16)));
+                const tr = Common.tr().get();
+                tr.appendChild(Common.td(n.toString(16)).get());
                 this.table.appendChild(tr);
                 for (let i = 2; i <= 7; ++i) {
                     const num = i * 16 + n;
-                    const td = createTd();
+                    const td = Common.td().get();
                     if (num < 127) {
-                        const char = document.createElement('pre');
+                        const char = Common.pre().get();
                         char.textContent = String.fromCharCode(num);
-                        const charCode = document.createElement('div');
+                        const charCode = Common.div().get();
                         charCode.innerHTML = `${num}<br>0x${num.toString(16)}`;
                         td.appendChild(char);
                         td.appendChild(charCode);
@@ -261,8 +406,7 @@ class ServiceWorkerManager {
                     tr.appendChild(td);
                 }
             }
-            const code = document.createElement('input');
-            code.placeholder = 'Code';
+            const code = Common.inputText('Code').get();
             code.addEventListener('input', () => {
                 const value = code.value.replace(/[^0-9a-fA-Fx]/g, '').replace(/0x/g, '');
                 const codes = [];
@@ -280,8 +424,7 @@ class ServiceWorkerManager {
                     return String.fromCharCode(code);
                 }).join('');
             });
-            const text = document.createElement('input');
-            text.placeholder = 'Text';
+            const text = Common.inputText('Text.').get();
             text.addEventListener('input', () => {
                 const value = text.value.replace(/[^ \!\"\#\$\%\&\'\(\)\*\+\,\-\.\/0123456789\:\;\<\=\>\?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]\^\_\`abcdefghijklmnopqrstuvwxyz\{\|\}\~]/g, '');
                 text.value = value;
@@ -289,15 +432,11 @@ class ServiceWorkerManager {
                     return `0x${char.charCodeAt(0).toString(16)}`;
                 }).join('');
             });
-            const reset = document.createElement('button');
-            reset.textContent = '↻';
-            reset.addEventListener('click', () => {
+            const reset = Common.button('🗑', () => {
                 code.value = '';
                 text.value = '';
-            });
-            const remove = document.createElement('button');
-            remove.textContent = '⇦';
-            remove.addEventListener('click', () => {
+            }).get();
+            const remove = Common.button('⇦', () => {
                 const chars = text.value.split('');
                 chars.pop();
                 console.log(chars);
@@ -305,16 +444,10 @@ class ServiceWorkerManager {
                 code.value = chars.map((char) => {
                     return `0x${char.charCodeAt(0).toString(16)}`;
                 }).join('');
-            });
-            const inputs = document.createElement('div');
+            }).get();
+            const inputs = Common.div(reset, code, text, remove).get();
             inputs.classList.add('input');
-            inputs.appendChild(reset);
-            inputs.appendChild(code);
-            inputs.appendChild(text);
-            inputs.appendChild(remove);
-            const contents = document.createElement('div');
-            contents.appendChild(this.table);
-            contents.appendChild(inputs);
+            const contents = Common.div(this.table, inputs).get();
             shadow.appendChild(style);
             shadow.appendChild(contents);
             this.parentElement.addContent(tagname, this);
@@ -372,27 +505,27 @@ const Morse = {
                 ':host > div > div > div > div:first-child { font-size: var(--card); line-height: var(--card); }',
                 ':host > div > div > div > div:last-child { font-size: calc(0.5 * var(--card)); line-height: calc(0.5 * var(--card)); }',
             ].join('');
-            this.previewDot = document.createElement('div');
-            this.previewDotMorse = document.createElement('div');
-            this.previewDash = document.createElement('div');
-            this.previewDashMorse = document.createElement('div');
-            this.previewNow = document.createElement('div');
-            this.previewNowMorse = document.createElement('div');
-            const dot = document.createElement('div');
+            this.previewDot = Common.div().get();
+            this.previewDotMorse = Common.div().get();
+            this.previewDash = Common.div().get();
+            this.previewDashMorse = Common.div().get();
+            this.previewNow = Common.div().get();
+            this.previewNowMorse = Common.div().get();
+            const dot = Common.div().get();
             dot.appendChild(this.previewDot);
             dot.appendChild(this.previewDotMorse);
             dot.addEventListener('click', (event) => {
                 event.stopPropagation();
                 this.dot();
             });
-            const dash = document.createElement('div');
+            const dash = Common.div().get();
             dash.appendChild(this.previewDash);
             dash.appendChild(this.previewDashMorse);
             dash.addEventListener('click', (event) => {
                 event.stopPropagation();
                 this.dash();
             });
-            const now = document.createElement('div');
+            const now = Common.div().get();
             now.appendChild(this.previewNow);
             now.appendChild(this.previewNowMorse);
             now.addEventListener('contextmenu', (event) => {
@@ -400,13 +533,13 @@ const Morse = {
                 event.preventDefault();
                 this.remove();
             });
-            const cardPrev = document.createElement('div');
+            const cardPrev = Common.div().get();
             cardPrev.appendChild(dot);
-            const cardDash = document.createElement('div');
+            const cardDash = Common.div().get();
             cardDash.appendChild(dash);
-            const cardNow = document.createElement('div');
+            const cardNow = Common.div().get();
             cardNow.appendChild(now);
-            const contents = document.createElement('div');
+            const contents = Common.div().get();
             contents.appendChild(cardPrev);
             contents.appendChild(cardNow);
             contents.appendChild(cardDash);
@@ -532,46 +665,6 @@ const Morse = {
     if (customElements.get(tagname)) {
         return;
     }
-    const SVG = {
-        create: (width, height) => {
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.setAttributeNS(null, 'width', `${width}px`);
-            svg.setAttributeNS(null, 'height', `${height}px`);
-            svg.setAttributeNS(null, 'viewBox', `0 0 ${width} ${height}`);
-            return svg;
-        },
-        path: (d, option) => {
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttributeNS(null, 'd', d);
-            if (option) {
-                if (option.id) {
-                    path.id = option.id;
-                }
-                if (option.class) {
-                    path.classList.add(option.class);
-                }
-            }
-            return path;
-        },
-        circle: (cx, cy, option) => {
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttributeNS(null, 'cx', cx + '');
-            circle.setAttributeNS(null, 'cy', cy + '');
-            circle.setAttributeNS(null, 'r', '3');
-            if (option) {
-                if (option.id) {
-                    circle.id = option.id;
-                }
-                if (option.class) {
-                    circle.classList.add(option.class);
-                }
-            }
-            return circle;
-        },
-        g: () => {
-            return document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        },
-    };
     customElements.define(tagname, class MorseCode extends HTMLElement {
         root;
         svg;
@@ -609,41 +702,26 @@ const Morse = {
             this.preview.addEventListener('click', () => {
                 this.addChar(this.preview.char);
             });
-            const preview = document.createElement('div');
-            preview.appendChild(this.preview);
+            const preview = Common.div(this.preview).get();
             preview.classList.add('preview');
-            const remove = document.createElement('button');
-            remove.textContent = '⇦';
-            remove.addEventListener('click', () => {
+            const remove = Common.button('⇦', () => {
                 this.preview.remove();
                 this.updateMorse();
-            });
-            const dot = document.createElement('button');
-            dot.textContent = '・';
-            dot.addEventListener('click', () => {
+            }).get();
+            const dot = Common.button('・', () => {
                 this.preview.dot();
                 this.updateMorse();
-            });
-            const dash = document.createElement('button');
-            dash.textContent = '－';
-            dash.addEventListener('click', () => {
+            }).get();
+            const dash = Common.button('－', () => {
                 this.preview.dash();
                 this.updateMorse();
-            });
-            const enter = document.createElement('button');
-            enter.addEventListener('click', () => {
+            }).get();
+            const enter = Common.button('↴', () => {
                 this.addChar(this.preview.char);
-            });
-            enter.textContent = '↴';
-            const inputs = document.createElement('div');
+            }).get();
+            const inputs = Common.div(remove, dot, dash, enter).get();
             inputs.classList.add('inputs');
-            inputs.appendChild(remove);
-            inputs.appendChild(dot);
-            inputs.appendChild(dash);
-            inputs.appendChild(enter);
-            this.morse = document.createElement('input');
-            this.morse.type = 'text';
-            this.morse.placeholder = 'Morse code. (. -)';
+            this.morse = Common.inputText('Morse code. (. -)').get();
             this.morse.addEventListener('input', () => {
                 this.morse.value = this.morse.value
                     .replace(/\s+/g, ' ')
@@ -651,26 +729,15 @@ const Morse = {
                     .replace(/^\s+/g, '');
                 this.changeFromMorse();
             });
-            this.text = document.createElement('input');
-            this.text.type = 'text';
-            this.text.placeholder = 'Text.';
+            this.text = Common.inputText('Text.').get();
             this.text.addEventListener('input', () => {
                 this.changeFromText();
             });
-            const reset = document.createElement('button');
-            reset.classList.add('reset');
-            reset.textContent = '↻';
-            reset.addEventListener('click', () => {
+            const reset = Common.button('🗑', () => {
                 this.morse.value = '';
                 this.text.value = '';
-            });
-            const contents = document.createElement('div');
-            contents.appendChild(this.svg);
-            contents.appendChild(this.morse);
-            contents.appendChild(reset);
-            contents.appendChild(this.text);
-            contents.appendChild(preview);
-            contents.appendChild(inputs);
+            }).get({ class: 'reset' });
+            const contents = Common.div(this.svg, this.morse, reset, this.text, preview, inputs).get();
             shadow.appendChild(style);
             shadow.appendChild(contents);
             this.parentElement.addContent(tagname, this);
@@ -771,8 +838,8 @@ const Morse = {
         }
         createSVG() {
             const codes = {};
-            const routes = SVG.g();
-            const frames = SVG.g();
+            const routes = Common.g();
+            const frames = Common.g();
             [
                 {
                     key: '5',
@@ -909,9 +976,9 @@ const Morse = {
                 },
                 { key: '_2', route: 'm44 56 7-4', cx: 51, cy: 52, char: '' },
             ].forEach((data) => {
-                const route = SVG.path(data.route, { class: 'dot' });
+                const route = Common.path(data.route).get({ class: 'dot' });
                 routes.appendChild(route);
-                const frame = SVG.circle(data.cx, data.cy, { class: 'frame' });
+                const frame = Common.circle(data.cx, data.cy, 3).get({ class: 'frame' });
                 frames.appendChild(frame);
                 if (!data.key.includes('_')) {
                     frame.addEventListener('click', () => {
@@ -919,7 +986,7 @@ const Morse = {
                     });
                 }
                 if (data.char) {
-                    const char = SVG.path(data.char, { class: 'char' });
+                    const char = Common.path(data.char).get({ class: 'char' });
                     frames.appendChild(char);
                 }
                 if (data.key.includes('_')) {
@@ -1042,9 +1109,9 @@ const Morse = {
                 { key: '_1', route: 'm20 24-7 4', frame: 'm12 25c-1.6569 0-3 1.3431-3 3s1.3431 3 3 3h2c1.6569 0 3-1.3431 3-3s-1.3431-3-3-3z', char: '' },
                 { key: '_3', route: 'm44 56 7 4', frame: 'm50 57c-1.6568 0-3 1.3432-3 3s1.3432 3 3 3h2c1.6568 0 3-1.3432 3-3s-1.3432-3-3-3z', char: '' },
             ].forEach((data) => {
-                const route = SVG.path(data.route, { class: 'dash' });
+                const route = Common.path(data.route).get({ class: 'dash' });
                 routes.appendChild(route);
-                const frame = SVG.path(data.frame, { class: 'frame' });
+                const frame = Common.path(data.frame).get({ class: 'frame' });
                 frames.appendChild(frame);
                 if (!data.key.includes('_')) {
                     frame.addEventListener('click', () => {
@@ -1052,7 +1119,7 @@ const Morse = {
                     });
                 }
                 if (data.char) {
-                    const char = SVG.path(data.char, { class: 'char' });
+                    const char = Common.path(data.char).get({ class: 'char' });
                     char.id = `char_${data.key}`;
                     frames.appendChild(char);
                 }
@@ -1070,8 +1137,8 @@ const Morse = {
                     frame: frame,
                 };
             });
-            frames.appendChild(SVG.path('m32 30-2 2 2 2 2-2z', { class: 'frame' }));
-            this.svg = SVG.create(64, 64);
+            frames.appendChild(Common.path('m32 30-2 2 2 2 2-2z').get({ class: 'frame' }));
+            this.svg = Common.svg(64, 64).get();
             this.svg.appendChild(routes);
             this.svg.appendChild(frames);
             return codes;
@@ -1089,20 +1156,6 @@ const Morse = {
     const tagname = 'caesar-cipher';
     if (customElements.get(tagname)) {
         return;
-    }
-    function createTr(...tds) {
-        const tr = document.createElement('tr');
-        for (const td of tds) {
-            tr.appendChild(td);
-        }
-        return tr;
-    }
-    function createTd(text) {
-        const td = document.createElement('td');
-        if (text) {
-            td.textContent = text;
-        }
-        return td;
     }
     customElements.define(tagname, class extends HTMLElement {
         base;
@@ -1135,66 +1188,41 @@ const Morse = {
                 'textarea { font-size: 2rem; }',
                 ':host(:not([mode="cipher"])) #encryption, :host([mode="cipher"]) #decryption { background: #c3d0e5; }',
             ].join('');
-            this.baseRow = createTr();
-            this.convertRow = createTr();
-            this.centerColumn = createTd();
-            const table = document.createElement('table');
-            table.appendChild(this.baseRow);
-            table.appendChild(createTr(this.centerColumn));
-            table.appendChild(this.convertRow);
-            const sub = document.createElement('button');
-            sub.textContent = '<';
-            sub.addEventListener('click', () => {
+            this.baseRow = Common.tr().get();
+            this.convertRow = Common.tr().get();
+            this.centerColumn = Common.td().get();
+            const table = Common.table(this.baseRow, Common.tr(this.centerColumn).get(), this.convertRow).get();
+            const sub = Common.button('<', () => {
                 this.shift.value = `${parseInt(this.shift.value) - 1}`;
                 this.updateTable();
-            });
-            const add = document.createElement('button');
-            add.textContent = '>';
-            add.addEventListener('click', () => {
+            }).get();
+            const add = Common.button('>', () => {
                 this.shift.value = `${parseInt(this.shift.value) + 1}`;
                 this.updateTable();
-            });
-            this.shift = document.createElement('input');
-            this.shift.type = 'number';
+            }).get();
+            this.shift = Common.inputNumber().get();
             this.shift.step = '1';
             this.shift.addEventListener('input', () => {
                 this.updateTable();
             });
-            const controller = document.createElement('div');
-            controller.appendChild(sub);
-            controller.appendChild(this.shift);
-            controller.appendChild(add);
+            const controller = Common.div(sub, this.shift, add).get();
             this.centerColumn.appendChild(controller);
-            this.rawText = document.createElement('textarea');
-            this.rawText.placeholder = 'Text.';
+            this.rawText = Common.textarea('Text.').get();
             this.rawText.addEventListener('input', () => {
                 this.encrypt();
             });
-            this.cipherText = document.createElement('textarea');
-            this.cipherText.placeholder = 'Cipher text.';
+            this.cipherText = Common.textarea('Cipher text.').get();
             this.cipherText.addEventListener('input', () => {
                 this.decrypt();
             });
-            const encryption = document.createElement('button');
-            encryption.textContent = '>';
-            encryption.id = 'encryption';
-            encryption.addEventListener('click', () => {
+            const encryption = Common.button('>', () => {
                 this.encrypt();
-            });
-            const decryption = document.createElement('button');
-            decryption.textContent = '<';
-            decryption.id = 'decryption';
-            decryption.addEventListener('click', () => {
+            }).get({ id: 'encryption' });
+            const decryption = Common.button('<', () => {
                 this.decrypt();
-            });
-            const convertArea = document.createElement('div');
-            convertArea.appendChild(this.rawText);
-            convertArea.appendChild(encryption);
-            convertArea.appendChild(decryption);
-            convertArea.appendChild(this.cipherText);
-            const contents = document.createElement('div');
-            contents.appendChild(convertArea);
-            contents.appendChild(table);
+            }).get({ id: 'decryption' });
+            const convertArea = Common.div(this.rawText, encryption, decryption, this.cipherText).get();
+            const contents = Common.div(convertArea, table).get();
             shadow.appendChild(style);
             shadow.appendChild(contents);
             this.parentElement.addContent(tagname, this);
@@ -1217,7 +1245,7 @@ const Morse = {
                 this.base = table;
                 this.baseRow.innerHTML = '';
                 for (const char of this.base) {
-                    this.baseRow.appendChild(createTd(char));
+                    this.baseRow.appendChild(Common.td(char).get());
                 }
                 this.centerColumn.colSpan = this.base.length;
             }
@@ -1229,7 +1257,7 @@ const Morse = {
             for (let i = 0; i < this.base.length; ++i) {
                 const char = this.base[(i + shift) % this.base.length];
                 this.convert.push(char);
-                this.convertRow.appendChild(createTd(char));
+                this.convertRow.appendChild(Common.td(char).get());
             }
             if (this.mode === 'cipher') {
                 this.decrypt(false);
@@ -1278,29 +1306,6 @@ const Morse = {
     if (customElements.get(tagname)) {
         return;
     }
-    const DL = {
-        dt: (title) => {
-            const dt = document.createElement('dt');
-            dt.textContent = title;
-            return dt;
-        },
-        dd: (content) => {
-            const dd = document.createElement('dd');
-            if (typeof content === 'string') {
-                dd.textContent = content;
-            }
-            else {
-                dd.appendChild(content);
-            }
-            return dd;
-        },
-        button: (text, callback) => {
-            const button = document.createElement('button');
-            button.textContent = text;
-            button.addEventListener('click', callback);
-            return button;
-        },
-    };
     customElements.define(tagname, class extends HTMLElement {
         get name() {
             return 'Config';
@@ -1317,31 +1322,29 @@ const Morse = {
             ].join('');
             const h1 = document.createElement('h1');
             h1.textContent = 'ango';
-            const detail = document.createElement('p');
-            detail.textContent = '何らかの謎解き系の暗号解読に使えそうなツール群です。';
-            const dl = document.createElement('dl');
-            dl.appendChild(DL.dt('Remove ServiceWorker.'));
-            dl.appendChild(DL.dd(DL.button('Remove', () => {
+            const detail = Common.p('何らかの謎解き系の暗号解読に使えそうなツール群です。').get();
+            const dl = Common.dl().get();
+            dl.appendChild(Common.dt('Remove ServiceWorker.').get());
+            dl.appendChild(Common.dd(Common.button('Remove', () => {
                 ServiceWorkerManager.unregister();
-            })));
-            dl.appendChild(DL.dt('Register ServiceWorker.'));
-            dl.appendChild(DL.dd(DL.button('Register', () => {
+            }).get()).get());
+            dl.appendChild(Common.dt('Register ServiceWorker.').get());
+            dl.appendChild(Common.dd(Common.button('Register', () => {
                 ServiceWorkerManager.register();
-            })));
+            }).get()).get());
             function updateSwitch(enable) {
                 switchTitle.textContent = `Switch ServiceWorker. [${enable ? 'Enable' : 'Disable'}]`;
                 switchSW.textContent = enable ? 'Deactivate' : 'Activate';
             }
-            const switchTitle = DL.dt('Switch ServiceWorker.');
-            const switchSW = DL.button('', () => {
+            const switchTitle = Common.dt('Switch ServiceWorker.').get();
+            const switchSW = Common.button('', () => {
                 updateSwitch(ServiceWorkerManager.toggle());
-            });
+            }).get();
             updateSwitch(!ServiceWorkerManager.disableUser());
             dl.appendChild(switchTitle);
-            dl.appendChild(DL.dd(switchSW));
-            const config = document.createElement('div');
-            config.appendChild(dl);
-            const contents = document.createElement('div');
+            dl.appendChild(Common.dd(switchSW).get());
+            const config = Common.div(dl).get();
+            const contents = Common.div().get();
             contents.appendChild(h1);
             contents.appendChild(detail);
             contents.appendChild(config);
