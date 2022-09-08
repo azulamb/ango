@@ -1,16 +1,19 @@
 const Common = (() => {
-	function option<T extends HTMLElement|SVGElement>(element: T) {
+	function option<T extends HTMLElement | SVGElement>(element: T) {
 		return {
-			get: (option?: {id?: string, class?: string[]|string}) => {
+			get: (option?: { id?: string; class?: string[] | string; colspan?: number }) => {
 				if (option) {
-					if(option.id) {
+					if (option.id) {
 						element.id = option.id;
 					}
-					if(option.class) {
+					if (option.class) {
 						const names = typeof option.class === 'string' ? [option.class] : option.class;
-						for(const name of names) {
+						for (const name of names) {
 							element.classList.add(name);
 						}
+					}
+					if (option.colspan) {
+						(<HTMLTableCellElement> element).colSpan = option.colspan;
 					}
 				}
 				return element;
@@ -24,46 +27,54 @@ const Common = (() => {
 				return String.fromCharCode(char.charCodeAt(0) | 32);
 			});
 		}
-	
+
 		static toUpperCase(str: string) {
 			return str.replace(/[a-z]/g, (char) => {
 				return String.fromCharCode(char.charCodeAt(0) & ~32);
 			});
 		}
-	
-		static div(...children: (HTMLElement|SVGElement)[]) {
+
+		static div(...children: (HTMLElement | SVGElement)[]) {
 			const div = document.createElement('div');
 			for (const child of children) {
 				div.appendChild(child);
 			}
 			return option(div);
 		}
-	
-		static p(...children: (HTMLElement|string)[]) {
+
+		static span(content = '') {
+			const span = document.createElement('span');
+			if (content) {
+				span.textContent = content;
+			}
+			return option(span);
+		}
+
+		static p(...children: (HTMLElement | string)[]) {
 			const p = document.createElement('p');
 			for (const child of children) {
 				if (typeof child === 'string') {
 					p.appendChild(document.createTextNode(child));
-				}else{
+				} else {
 					p.appendChild(child);
 				}
 			}
 			return option(p);
 		}
-	
+
 		static pre() {
 			const pre = document.createElement('pre');
 			return option(pre);
 		}
-	
-		static table(... children:(HTMLTableRowElement)[]) {
+
+		static table(...children: (HTMLTableRowElement)[]) {
 			const table = document.createElement('table');
 			for (const child of children) {
 				table.appendChild(child);
 			}
 			return option(table);
 		}
-	
+
 		static thead(content?: HTMLTableRowElement) {
 			const thead = document.createElement('thead');
 			if (content) {
@@ -71,7 +82,7 @@ const Common = (() => {
 			}
 			return option(thead);
 		}
-	
+
 		static tr(...tds: HTMLTableCellElement[]) {
 			const tr = document.createElement('tr');
 			for (const td of tds) {
@@ -79,7 +90,7 @@ const Common = (() => {
 			}
 			return option(tr);
 		}
-	
+
 		static td(content?: string | HTMLElement) {
 			const td = document.createElement('td');
 			if (content) {
@@ -91,7 +102,7 @@ const Common = (() => {
 			}
 			return option(td);
 		}
-	
+
 		static dl(...children: HTMLElement[]) {
 			const dl = document.createElement('dl');
 			for (const child of children) {
@@ -99,13 +110,13 @@ const Common = (() => {
 			}
 			return option(dl);
 		}
-	
+
 		static dt(title: string) {
 			const dt = document.createElement('dt');
 			dt.textContent = title;
 			return option(dt);
 		}
-	
+
 		static dd(content: string | HTMLElement) {
 			const dd = document.createElement('dd');
 			if (typeof content === 'string') {
@@ -115,42 +126,45 @@ const Common = (() => {
 			}
 			return option(dd);
 		}
-	
+
 		static button(text: string, callback: () => unknown) {
 			const button = document.createElement('button');
 			button.textContent = text;
 			button.addEventListener('click', callback);
 			return option(button);
 		}
-	
+
 		static textarea(placeholder?: string) {
 			const textarea = document.createElement('textarea');
-			if(placeholder){
+			if (placeholder) {
 				textarea.placeholder = placeholder;
 			}
 			return option(textarea);
 		}
-	
+
 		static input() {
 			const input = document.createElement('input');
 			return option(input);
 		}
-	
+
 		static inputText(placeholder?: string) {
 			const input = this.input();
 			input.get().type = 'text';
-			if(placeholder) {
+			if (placeholder) {
 				input.get().placeholder = placeholder;
 			}
 			return input;
 		}
-	
-		static inputNumber() {
+
+		static inputNumber(placeholder?: string) {
 			const input = this.input();
 			input.get().type = 'number';
+			if (placeholder) {
+				input.get().placeholder = placeholder;
+			}
 			return input;
 		}
-	
+
 		static select(...options: HTMLOptionElement[]) {
 			const select = document.createElement('select');
 			for (const child of options) {
@@ -158,7 +172,22 @@ const Common = (() => {
 			}
 			return option(select);
 		}
-	
+
+		static option(text: string, value: string) {
+			const opt = document.createElement('option');
+			opt.textContent = text;
+			opt.value = value;
+			return option(opt);
+		}
+
+		static dialog(...contents: HTMLElement[]) {
+			const dialog = document.createElement('dialog');
+			for (const child of contents) {
+				dialog.appendChild(child);
+			}
+			return option(dialog);
+		}
+
 		static svg(width: number, height: number) {
 			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 			svg.setAttributeNS(null, 'width', `${width}px`);
@@ -166,13 +195,13 @@ const Common = (() => {
 			svg.setAttributeNS(null, 'viewBox', `0 0 ${width} ${height}`);
 			return option(svg);
 		}
-	
+
 		static path(d: string) {
 			const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 			path.setAttributeNS(null, 'd', d);
 			return option(path);
 		}
-	
+
 		static circle(cx: number, cy: number, r: number) {
 			const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 			circle.setAttributeNS(null, 'cx', cx + '');
@@ -180,9 +209,9 @@ const Common = (() => {
 			circle.setAttributeNS(null, 'r', r + '');
 			return option(circle);
 		}
-	
+
 		static g() {
 			return document.createElementNS('http://www.w3.org/2000/svg', 'g');
 		}
-	}
+	};
 })();

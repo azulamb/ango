@@ -93,11 +93,11 @@
 
 				const encryption = Common.button('>', () => {
 					this.encrypt();
-				}).get({id: 'encryption'});
+				}).get({ id: 'encryption' });
 
 				const decryption = Common.button('<', () => {
 					this.decrypt();
-				}).get({id: 'decryption'});
+				}).get({ id: 'decryption' });
 
 				const convertArea = Common.div(
 					this.rawText,
@@ -181,7 +181,7 @@
 					}
 					return this.base[index];
 				}).join('');
-				if(update){
+				if (update) {
 					this.mode = 'cipher';
 				}
 			}

@@ -113,7 +113,7 @@ interface MorseCodeNode extends MorseNode {
 				const reset = Common.button('🗑', () => {
 					this.morse.value = '';
 					this.text.value = '';
-				}).get({class: 'reset'});
+				}).get({ class: 'reset' });
 
 				const contents = Common.div(
 					this.svg,
