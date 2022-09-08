@@ -12,6 +12,9 @@ const Common = (() => {
                             element.classList.add(name);
                         }
                     }
+                    if (option.colspan) {
+                        element.colSpan = option.colspan;
+                    }
                 }
                 return element;
             },
@@ -34,6 +37,13 @@ const Common = (() => {
                 div.appendChild(child);
             }
             return option(div);
+        }
+        static span(content = '') {
+            const span = document.createElement('span');
+            if (content) {
+                span.textContent = content;
+            }
+            return option(span);
         }
         static p(...children) {
             const p = document.createElement('p');
@@ -131,9 +141,12 @@ const Common = (() => {
             }
             return input;
         }
-        static inputNumber() {
+        static inputNumber(placeholder) {
             const input = this.input();
             input.get().type = 'number';
+            if (placeholder) {
+                input.get().placeholder = placeholder;
+            }
             return input;
         }
         static select(...options) {
@@ -142,6 +155,19 @@ const Common = (() => {
                 select.appendChild(child);
             }
             return option(select);
+        }
+        static option(text, value) {
+            const opt = document.createElement('option');
+            opt.textContent = text;
+            opt.value = value;
+            return option(opt);
+        }
+        static dialog(...contents) {
+            const dialog = document.createElement('dialog');
+            for (const child of contents) {
+                dialog.appendChild(child);
+            }
+            return option(dialog);
         }
         static svg(width, height) {
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -277,9 +303,7 @@ class ServiceWorkerManager {
             }
         }
         addContent(tag, content) {
-            const option = document.createElement('option');
-            option.value = tag;
-            option.textContent = content.name;
+            const option = Common.option(content.name, tag).get();
             if (this.page === tag || (this.page === '' && tag === 'ango-config')) {
                 option.selected = true;
             }
@@ -463,6 +487,319 @@ class ServiceWorkerManager {
             for (const element of this.table.querySelectorAll(`td:nth-child(${x})`)) {
                 element.classList.add('selected');
             }
+        }
+    });
+});
+((script, init) => {
+    if (document.readyState !== 'loading') {
+        return init(script);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        init(script);
+    });
+})(document.currentScript, (script) => {
+    const tagname = 'base-number';
+    if (customElements.get(tagname)) {
+        return;
+    }
+    customElements.define(tagname, class extends HTMLElement {
+        get name() {
+            return 'BaseNumber';
+        }
+        constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; }',
+                `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
+                ':host > div { display: grid; grid-template-columns: 1fr 2rem; grid-template-rows: 2rem 2rem 2rem 2rem 1fr; grid-template-areas: "a x" "b x" "c x" "d x" "y y" "z z"; }',
+                ':host > div > input { display: block; margin: auto; font-size: 3vmin; width: 100%; box-sizing: border-box; text-align: right; }',
+                ':host > div > button { cursor: pointer; grid-area: x; }',
+                ':host > div > div > button { cursor: pointer; font-size: 2em; }',
+                ':host > div > div.option { grid-area: y; grid-area: y / y / y / y; display: grid; grid-template-columns: 25% 25% 25% 25%; }',
+                ':host > div > div[data-base="2"] > button[data-base="2"], :host > div > div[data-base="8"] > button[data-base="8"], :host > div > div[data-base="10"] > button[data-base="10"], :host > div > div[data-base="16"] > button[data-base="16"] { background: #cdcdcd; }',
+                ':host > div > div > span { display: inline-block; background: #cdcdcd; padding: 0.2rem; margin: 0.2rem; border-radius: 0.2rem; }',
+            ].join('');
+            const binary = Common.inputText('Binary:').get();
+            binary.addEventListener('input', () => {
+                const value = parseInt(binary.value, 2);
+                if (Number.isNaN(value)) {
+                    if (binary.value === '') {
+                        octal.value = '';
+                        decimal.value = '';
+                        hexadecimal.value = '';
+                    }
+                    return;
+                }
+                binary.value = value.toString(2);
+                octal.value = value.toString(8);
+                decimal.value = value.toString(10);
+                hexadecimal.value = value.toString(16);
+            });
+            const octal = Common.inputText('Octal:').get();
+            octal.addEventListener('input', () => {
+                const value = parseInt(octal.value, 8);
+                if (Number.isNaN(value)) {
+                    if (octal.value === '') {
+                        binary.value = '';
+                        decimal.value = '';
+                        hexadecimal.value = '';
+                    }
+                    return;
+                }
+                binary.value = value.toString(2);
+                octal.value = value.toString(8);
+                decimal.value = value.toString(10);
+                hexadecimal.value = value.toString(16);
+            });
+            const decimal = Common.inputNumber('Decimal:').get();
+            decimal.addEventListener('input', () => {
+                const value = parseInt(decimal.value);
+                if (Number.isNaN(value)) {
+                    if (decimal.value === '') {
+                        binary.value = '';
+                        octal.value = '';
+                        decimal.value = '';
+                        hexadecimal.value = '';
+                    }
+                    return;
+                }
+                binary.value = value.toString(2);
+                octal.value = value.toString(8);
+                decimal.value = value.toString(10);
+                hexadecimal.value = value.toString(16);
+            });
+            const hexadecimal = Common.inputText('Hexadecimal:').get();
+            hexadecimal.addEventListener('input', () => {
+                const value = parseInt(hexadecimal.value, 16);
+                if (Number.isNaN(value)) {
+                    if (hexadecimal.value === '') {
+                        binary.value = '';
+                        octal.value = '';
+                        decimal.value = '';
+                    }
+                    return;
+                }
+                binary.value = value.toString(2);
+                octal.value = value.toString(8);
+                decimal.value = value.toString(10);
+                hexadecimal.value = value.toString(16);
+            });
+            const add = Common.button('↓', () => {
+                if (!decimal.value) {
+                    return;
+                }
+                const num = Common.span().get();
+                num.textContent = `${decimal.value}`;
+                num.dataset.value = parseInt(decimal.value).toString(parseInt(option.dataset.base));
+                nums.appendChild(num);
+                binary.value = '';
+                octal.value = '';
+                decimal.value = '';
+                hexadecimal.value = '';
+            }).get();
+            const option = Common.div().get({ class: 'option' });
+            option.dataset.base = '10';
+            for (const n of [2, 8, 10, 16]) {
+                const button = Common.button(`${n}`, () => {
+                    option.dataset.base = n + '';
+                    nums.querySelectorAll('span').forEach((num) => {
+                        num.textContent = parseInt(num.dataset.value).toString(n);
+                    });
+                }).get();
+                button.dataset.base = n + '';
+                option.appendChild(button);
+            }
+            const nums = Common.div().get();
+            nums.style.gridArea = 'z';
+            const contents = document.createElement('div');
+            contents.appendChild(binary);
+            contents.appendChild(octal);
+            contents.appendChild(decimal);
+            contents.appendChild(hexadecimal);
+            contents.appendChild(add);
+            contents.appendChild(option);
+            contents.appendChild(nums);
+            shadow.appendChild(style);
+            shadow.appendChild(contents);
+            this.parentElement.addContent(tagname, this);
+        }
+    });
+});
+((script, init) => {
+    if (document.readyState !== 'loading') {
+        return init(script);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        init(script);
+    });
+})(document.currentScript, (script) => {
+    const tagname = 'base64-converter';
+    if (customElements.get(tagname)) {
+        return;
+    }
+    class Base64 {
+        base64Table;
+        emptyString;
+        constructor() {
+            this.table = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'];
+            this.empty = '=';
+        }
+        set table(table) {
+            this.base64Table = table.join('');
+        }
+        get table() {
+            return [...this.base64Table];
+        }
+        set empty(empty) {
+            this.emptyString = empty;
+        }
+        get empty() {
+            return this.emptyString;
+        }
+        toString(base64) {
+            return new TextDecoder().decode(this.toUint8Array(base64));
+        }
+        toUint8Array(base64) {
+            const str = base64.replace(new RegExp(this.emptyString, 'g'), '');
+            if (str.match(new RegExp(`/[^${this.base64Table.replace(/[^0-9a-zA-Z]/g, '\\$1')}]/`))) {
+                throw new Error('Invalid value. Exists illegal characters.');
+            }
+            const chars = [...str];
+            const data = new Uint8Array(((chars.length + (chars.length % 4 ? 4 : 0)) >> 2) * 3);
+            const converter = (char) => {
+                const index = this.base64Table.indexOf(char);
+                return index < 0 ? 0 : index;
+            };
+            let w = 0;
+            for (let i = 0; i < chars.length; i += 4) {
+                const [a, b, c, d] = [
+                    converter(chars[i]),
+                    converter(chars[i + 1]),
+                    converter(chars[i + 2]),
+                    converter(chars[i + 3]),
+                ];
+                if (w < data.length)
+                    data[w++] = (a << 2) | (b >> 4);
+                if (w < data.length && i + 2 < chars.length)
+                    data[w++] = ((b & 0xF) << 4) | (c >> 2);
+                if (w < data.length && i + 3 < chars.length)
+                    data[w++] = ((c & 0x3) << 6) | d;
+            }
+            if (w === data.length)
+                return data;
+            const newData = new Uint8Array(w);
+            newData.set(data.slice(0, w));
+            return newData;
+        }
+        fromString(data) {
+            return this.fromUint8Array((new TextEncoder()).encode(data));
+        }
+        fromUint8Array(buffer) {
+            const base64 = [];
+            for (let i = 0; i < buffer.length; i += 3) {
+                const [a, b, c] = [buffer[i], buffer[i + 1] || 0, buffer[i + 2] || 0];
+                base64.push(this.base64Table[a >> 2]);
+                base64.push(this.base64Table[((a & 0x3) << 4) | (b >> 4)]);
+                base64.push(i + 1 < buffer.length ? this.base64Table[(b & 0xF) << 2 | (c >> 6)] : this.emptyString);
+                base64.push(i + 2 < buffer.length ? this.base64Table[c & 0x3F] : this.emptyString);
+            }
+            return base64.join('');
+        }
+    }
+    customElements.define(tagname, class extends HTMLElement {
+        base64;
+        get name() {
+            return 'Base64';
+        }
+        constructor() {
+            super();
+            this.base64 = new Base64();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; }',
+                `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
+                ':host > div > textarea { display: block; margin: auto; font-size: 3vmin; width: 100%; }',
+                ':host > div > table { margin: auto; }',
+                ':host > div > table > tr > td > button { display: block; width: 100%; cursor: pointer; font-size: 8vmin; }',
+                ':host dialog { border: 0; background: transparent; padding: 0; }',
+                ':host dialog::backdrop { background: rgba(0, 0, 0, 0.3); }',
+                ':host dialog > div { padding: 1rem; font-size: 10vmin; background: var(--back); border-radius: 0.5rem; display: grid; grid-template-rows: 1em 1em; grid-template-columns: 50% 50%; }',
+                ':host dialog > div > div { line-height: 11vmin; font-size: 8vmin; }',
+                ':host dialog > div > div::after { content: "→"; }',
+                ':host dialog > div > select { font-size: 8vmin; }',
+                ':host dialog > div > button { font-size: 8vmin; grid-area: 2 / 1 / 3 / 3; cursor: pointer; }',
+            ].join('');
+            const text = Common.textarea('Text').get();
+            text.addEventListener('input', () => {
+                base64.value = this.base64.fromString(text.value);
+            });
+            const base64 = Common.textarea('Base64').get();
+            base64.addEventListener('input', () => {
+                text.value = this.base64.toString(base64.value);
+            });
+            const select = Common.select().get();
+            const before = Common.div().get();
+            const table = Common.table().get();
+            for (let y = 0; y < 8; ++y) {
+                const tr = Common.tr().get();
+                table.appendChild(tr);
+                for (let x = 0; x < 8; ++x) {
+                    const index = y * 8 + x;
+                    const value = this.base64.table[index];
+                    const td = Common.td(Common.button(value, () => {
+                        before.textContent = this.base64.table[index];
+                        before.dataset.index = index + '';
+                        dialog.showModal();
+                    }).get()).get();
+                    tr.appendChild(td);
+                    const option = Common.option(value, value).get();
+                    select.appendChild(option);
+                }
+            }
+            table.appendChild(Common.tr(Common.td(Common.button(this.base64.empty, () => {
+                before.textContent = this.base64.empty;
+                dialog.showModal();
+            }).get()).get({ colspan: 8 })).get());
+            select.appendChild(Common.option(this.base64.empty, this.base64.empty).get());
+            select.appendChild(Common.option('-', '-').get());
+            select.appendChild(Common.option('.', '.').get());
+            select.appendChild(Common.option('_', '_').get());
+            select.appendChild(Common.option(':', ':').get());
+            select.appendChild(Common.option('!', '!').get());
+            const update = Common.button('Change', () => {
+                const value = select.options[select.selectedIndex].value;
+                if (before.dataset.index) {
+                    const index = parseInt(before.dataset.index);
+                    const table = this.base64.table;
+                    table[index] = value;
+                    this.base64.table = table;
+                }
+                else {
+                    this.base64.empty = value;
+                }
+                base64.value = this.base64.fromString(text.value);
+                dialog.close();
+            }).get();
+            const dialogContents = Common.div(before, select, update).get();
+            dialogContents.addEventListener('click', (event) => {
+                event.stopPropagation();
+            });
+            const dialog = Common.dialog(dialogContents).get();
+            dialog.addEventListener('click', (event) => {
+                event.stopPropagation();
+                dialog.close();
+            });
+            const contents = document.createElement('div');
+            contents.appendChild(text);
+            contents.appendChild(base64);
+            contents.appendChild(table);
+            contents.appendChild(dialog);
+            shadow.appendChild(style);
+            shadow.appendChild(contents);
+            this.parentElement.addContent(tagname, this);
         }
     });
 });
@@ -1351,6 +1688,275 @@ const Morse = {
             shadow.appendChild(style);
             shadow.appendChild(contents);
             this.parentElement.addContent(tagname, this);
+        }
+    });
+});
+((script, init) => {
+    if (document.readyState !== 'loading') {
+        return init(script);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        init(script);
+    });
+})(document.currentScript, (script) => {
+    const tagname = 'vigenere-cipher';
+    if (customElements.get(tagname)) {
+        return;
+    }
+    customElements.define(tagname, class extends HTMLElement {
+        table;
+        kv = {};
+        value = {};
+        key;
+        vigenere;
+        text;
+        mode = false;
+        get name() {
+            return 'VigenereCipher';
+        }
+        constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; }',
+                `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
+                ':host > div > table { font-size: calc(100vmin/40); text-align: center; margin: auto; }',
+                ':host > div > input { display: block; margin: auto; font-size: 3vmin; width: 100%; }',
+            ].join('');
+            this.table = Common.table().get();
+            const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+            const tr = Common.tr(Common.td('').get()).get();
+            for (const x of alphabet) {
+                const td = Common.td(x).get();
+                tr.appendChild(td);
+            }
+            this.table.appendChild(tr);
+            for (let r = 0; r < alphabet.length; ++r) {
+                const y = alphabet[r];
+                const tr = Common.tr(Common.td(y).get()).get();
+                for (let i = 0; i < alphabet.length; ++i) {
+                    const x = alphabet[(r + i) % alphabet.length];
+                    const key = y + alphabet[i];
+                    const td = Common.td(x).get({ id: key });
+                    tr.appendChild(td);
+                    this.kv[key] = x;
+                    this.value[y + x] = alphabet[i];
+                }
+                this.table.appendChild(tr);
+            }
+            this.key = Common.inputText('Key').get();
+            this.key.addEventListener('input', () => {
+                this.update();
+            });
+            this.vigenere = Common.inputText('Vigenere').get();
+            this.vigenere.addEventListener('input', () => {
+                this.mode = false;
+                this.update();
+            });
+            this.text = Common.inputText('Text').get();
+            this.text.addEventListener('input', () => {
+                this.mode = true;
+                this.update();
+            });
+            const contents = document.createElement('div');
+            contents.appendChild(this.key);
+            contents.appendChild(this.vigenere);
+            contents.appendChild(this.text);
+            contents.appendChild(this.table);
+            shadow.appendChild(style);
+            shadow.appendChild(contents);
+            this.parentElement.addContent(tagname, this);
+        }
+        update() {
+            const key = [...Common.toUpperCase(this.key.value)];
+            if (key.length <= 0) {
+                return;
+            }
+            if (this.mode) {
+                this.vigenere.value = [...Common.toUpperCase(this.text.value)].map((char, index) => {
+                    const y = key[index % key.length];
+                    console.log(`${y} ${char} => ${this.kv[y + char]}`);
+                    return this.kv[y + char];
+                }).join('');
+            }
+            else {
+                this.text.value = [...Common.toUpperCase(this.vigenere.value)].map((char, index) => {
+                    const y = key[index % key.length];
+                    console.log(`${y} ${char} => ${this.value[y + char]}`);
+                    return this.value[y + char];
+                }).join('');
+            }
+        }
+    });
+});
+((script, init) => {
+    if (document.readyState !== 'loading') {
+        return init(script);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        init(script);
+    });
+})(document.currentScript, (script) => {
+    const tagname = 'adfgvx-cipher';
+    if (customElements.get(tagname)) {
+        return;
+    }
+    customElements.define(tagname, class extends HTMLElement {
+        table;
+        key;
+        adfgvx;
+        text;
+        mode = false;
+        get name() {
+            return 'ADFGVX Cipher';
+        }
+        constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; }',
+                `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
+                ':host > div > input { display: block; margin: auto; font-size: 3vmin; width: 100%; }',
+                ':host > div > #table { width: 7em; font-size: 8vmin; margin: auto; text-align: center; line-height: 1em; display: grid; grid-template-rows: 1em 1em 1em 1em 1em 1em 1em; grid-template-columns: 1em 1em 1em 1em 1em 1em 1em; }',
+                ':host > div > #table > button { font-size: 6vmin; display: block; box-sizing: border-box; }',
+                ':host dialog { border: 0; background: transparent; padding: 0; }',
+                ':host dialog::backdrop { background: rgba(0, 0, 0, 0.3); }',
+                ':host dialog > div { padding: 1rem; font-size: 10vmin; background: var(--back); border-radius: 0.5rem; display: grid; grid-template-rows: 1em 1em 1em 1em 1em 1em; grid-template-columns: 1em 1em 1em 1em 1em 1em; }',
+                ':host dialog > div > button { font-size: 8vmin; }',
+            ].join('');
+            this.table = Common.div().get({ id: 'table' });
+            const def = [...'dhxmu4p3j6aoibzv9w1n70qkfslyc8tr5e2g'];
+            const chars = [...'ADFGVX'];
+            for (let x = -1; x < 6; ++x) {
+                this.table.appendChild(Common.span(x < 0 ? '' : chars[x]).get());
+            }
+            let target;
+            for (let y = 0; y < 6; ++y) {
+                for (let x = -1; x < 6; ++x) {
+                    if (x < 0) {
+                        this.table.appendChild(Common.span(chars[y]).get());
+                    }
+                    else {
+                        const button = Common.button(def[y * 6 + x], () => {
+                            target = button;
+                            dialog.showModal();
+                        }).get();
+                        button.id = chars[y] + chars[x];
+                        this.table.appendChild(button);
+                    }
+                }
+            }
+            const dialogContents = Common.div(...[...'abcdefghijklmnopqrstuvwxyz0123456789'].map((char) => {
+                const button = Common.button(char, () => {
+                    target.textContent = char;
+                    dialog.close();
+                }).get();
+                return button;
+            })).get();
+            dialogContents.addEventListener('click', (event) => {
+                event.stopPropagation();
+            });
+            const dialog = Common.dialog(dialogContents).get();
+            dialog.addEventListener('click', (event) => {
+                event.stopPropagation();
+                dialog.close();
+            });
+            this.key = Common.inputText('Key').get();
+            this.key.addEventListener('input', () => {
+                this.update();
+            });
+            this.adfgvx = Common.inputText('Vigenere').get();
+            this.adfgvx.addEventListener('input', () => {
+                this.mode = false;
+                this.update();
+            });
+            this.text = Common.inputText('Text').get();
+            this.text.addEventListener('input', () => {
+                this.mode = true;
+                this.update();
+            });
+            const contents = document.createElement('div');
+            contents.appendChild(this.key);
+            contents.appendChild(this.adfgvx);
+            contents.appendChild(this.text);
+            contents.appendChild(this.table);
+            shadow.appendChild(style);
+            shadow.appendChild(contents);
+            shadow.appendChild(dialog);
+            this.parentElement.addContent(tagname, this);
+        }
+        update() {
+            const values = {};
+            const keys = {};
+            [...this.table.querySelectorAll('button')].map((button) => {
+                const value = button.textContent || '';
+                values[value] = button;
+                keys[Common.toLowerCase(button.id)] = value;
+                return;
+            });
+            const key = [...this.key.value].filter((char, index, array) => {
+                return array.indexOf(char) === index;
+            }).join('');
+            const tkey = (() => {
+                const list = key.split('').sort();
+                return key.split('').map((char) => {
+                    return list.indexOf(char);
+                });
+            })();
+            if (this.mode) {
+                const stage1 = Common.toLowerCase(this.text.value).split('').map((char) => {
+                    return values[char].id;
+                }).join('');
+                const stage2 = [];
+                stage1.split('').map((char, index) => {
+                    const i = index % tkey.length;
+                    if (!stage2[i]) {
+                        stage2[i] = [];
+                    }
+                    stage2[i].push(char);
+                });
+                this.adfgvx.value = tkey.map((v, index) => {
+                    return stage2[tkey.indexOf(index)].join('');
+                }).join('');
+            }
+            else {
+                const length = this.adfgvx.value.length;
+                const max = tkey.map((v, index) => {
+                    return Math.floor(length / tkey.length) + (index < length % tkey.length ? 1 : 0);
+                });
+                const stage1 = tkey.map(() => {
+                    return [];
+                });
+                const chars = Common.toLowerCase(this.adfgvx.value).split('');
+                for (let i = 0; i < tkey.length; ++i) {
+                    const index = tkey.indexOf(i);
+                    const m = max[index];
+                    for (let i = 0; i < m; ++i) {
+                        stage1[index].push(chars.shift() || '');
+                    }
+                }
+                const stage2 = [];
+                const m = max.reduce((prev, length) => {
+                    return Math.max(prev, length);
+                }, 0);
+                for (let i = 0; i < m; ++i) {
+                    for (const list of stage1) {
+                        const char = list.shift();
+                        if (char) {
+                            stage2.push(char);
+                        }
+                    }
+                }
+                const stage3 = [];
+                for (let i = 0; i < stage2.length; i += 2) {
+                    stage3.push(stage2[i] + stage2[i + 1]);
+                }
+                this.text.value = stage3.map((key) => {
+                    return keys[key];
+                }).join('');
+            }
         }
     });
 });

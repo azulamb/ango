@@ -64,10 +64,8 @@ interface AngoContentsElement extends HTMLElement {
 			}
 
 			addContent(tag: string, content: AngoElement) {
-				const option = document.createElement('option');
-				option.value = tag;
-				option.textContent = content.name;
-				if (this.page === tag||(this.page === '' && tag ==='ango-config')) {
+				const option = Common.option(content.name, tag).get();
+				if (this.page === tag || (this.page === '' && tag === 'ango-config')) {
 					option.selected = true;
 				}
 

@@ -38,14 +38,22 @@
 				const dl = Common.dl().get();
 
 				dl.appendChild(Common.dt('Remove ServiceWorker.').get());
-				dl.appendChild(Common.dd(Common.button('Remove', () => {
-					ServiceWorkerManager.unregister();
-				}).get()).get());
+				dl.appendChild(
+					Common.dd(
+						Common.button('Remove', () => {
+							ServiceWorkerManager.unregister();
+						}).get(),
+					).get(),
+				);
 
 				dl.appendChild(Common.dt('Register ServiceWorker.').get());
-				dl.appendChild(Common.dd(Common.button('Register', () => {
-					ServiceWorkerManager.register();
-				}).get()).get());
+				dl.appendChild(
+					Common.dd(
+						Common.button('Register', () => {
+							ServiceWorkerManager.register();
+						}).get(),
+					).get(),
+				);
 
 				function updateSwitch(enable: boolean) {
 					switchTitle.textContent = `Switch ServiceWorker. [${enable ? 'Enable' : 'Disable'}]`;
