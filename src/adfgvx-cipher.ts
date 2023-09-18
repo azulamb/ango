@@ -1,8 +1,5 @@
 ((script, init) => {
-	if (document.readyState !== 'loading') {
-		return init(script);
-	}
-	document.addEventListener('DOMContentLoaded', () => {
+	customElements.whenDefined('ango-contents').then(() => {
 		init(script);
 	});
 })(<HTMLScriptElement> document.currentScript, (script: HTMLScriptElement) => {
@@ -105,7 +102,7 @@
 				shadow.appendChild(contents);
 				shadow.appendChild(dialog);
 
-				(<AngoContentsElement> this.parentElement).addContent(tagname, this);
+				this.dispatchEvent(new CustomEvent('register'));
 			}
 
 			protected update() {

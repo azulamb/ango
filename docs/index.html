@@ -10,15 +10,147 @@
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<link rel="apple-touch-icon" sizes="152x152" href="./apple-touch-icon-precomposed.png">
 	<style>:root{--front:#333333;--back:#e6e6e6;}html{height:100%;font-size:3vw;touch-action:manipulation;}body{height:100%;margin:0;}</style>
+	<style>.monospace{font-family:monospace;}table{font-size:2rem;margin:auto;}h2{text-align:center;}button{cursor:pointer;font-size:1.5rem;line-height:1.5rem;}input{font-size:1.5rem;}input,button,textarea{outline:none;box-sizing:border-box;padding:0;}</style>
+	<style>ascii-keyboard button:not([slot]){display:grid;grid-template-rows:1rem 2rem;width:5rem;font-size:2rem;}ascii-keyboard button span{text-align:center;}ascii-keyboard button span:first-child{opacity:0.4;font-size:1rem;line-height:1em;}ascii-keyboard button span:last-child::before{content:'0x';opacity:0.2;font-size:1.5rem;}</style>
 	<script src="./app.js" data-sw="./sw.js" async></script>
 </head>
 <body>
 	<ango-contents>
+		<number-list>
+			<h2>数からわかる文字種</h2>
+			<table>
+				<tr><td>数</td><td>文字種</td></tr>
+				<tr><td>26</td><td>アルファベット</td></tr>
+				<tr><td>52</td><td>アルファベット(大文字小文字)</td></tr>
+				<tr><td>62</td><td>アルファベット(大文字小文字数字)</td></tr>
+				<tr><td>46</td><td>ひらがな</td></tr>
+				<tr><td>47</td><td>ひらがな(いろは)</td></tr>
+				<tr><td>48</td><td>ひらがな(古語含む)</td></tr>
+			</table>
+
+			<h2>モールス信号</h2>
+			<p>5桁固定で2つの符号ならばモールス信号の数字の可能性がある</p>
+			<table class="monospace">
+				<tr><td>1</td><td>・－－－－</td></tr>
+				<tr><td>2</td><td>・・－－－</td></tr>
+				<tr><td>3</td><td>・・・－－</td></tr>
+				<tr><td>4</td><td>・・・・－</td></tr>
+				<tr><td>5</td><td>・・・・・</td></tr>
+				<tr><td>6</td><td>－・・・・</td></tr>
+				<tr><td>7</td><td>－－・・・</td></tr>
+				<tr><td>8</td><td>－－－・・</td></tr>
+				<tr><td>9</td><td>－－－－・</td></tr>
+				<tr><td>0</td><td>－－－－－</td></tr>
+			</table>
+
+			<h2>中国式指数字</h2>
+			<img src="./hand.svg">
+		</number-list>
 		<ascii-code></ascii-code>
+		<ascii-keyboard>
+			<input slot="result">
+			<button slot="clear">🗑</button>
+			<button><span>32</span><span>20</span></button>
+			<button><span>33</span><span>21</span></button>
+			<button><span>34</span><span>22</span></button>
+			<button><span>35</span><span>23</span></button>
+			<button><span>36</span><span>24</span></button>
+			<button><span>37</span><span>25</span></button>
+			<button><span>38</span><span>26</span></button>
+			<button><span>39</span><span>27</span></button>
+			<button><span>40</span><span>28</span></button>
+			<button><span>41</span><span>29</span></button>
+			<button><span>42</span><span>2a</span></button>
+			<button><span>43</span><span>2b</span></button>
+			<button><span>44</span><span>2c</span></button>
+			<button><span>45</span><span>2d</span></button>
+			<button><span>46</span><span>2e</span></button>
+			<button><span>47</span><span>2f</span></button>
+			<button><span>48</span><span>30</span></button>
+			<button><span>49</span><span>31</span></button>
+			<button><span>50</span><span>32</span></button>
+			<button><span>51</span><span>33</span></button>
+			<button><span>52</span><span>34</span></button>
+			<button><span>53</span><span>35</span></button>
+			<button><span>54</span><span>36</span></button>
+			<button><span>55</span><span>37</span></button>
+			<button><span>56</span><span>38</span></button>
+			<button><span>57</span><span>39</span></button>
+			<button><span>58</span><span>3a</span></button>
+			<button><span>59</span><span>3b</span></button>
+			<button><span>60</span><span>3c</span></button>
+			<button><span>61</span><span>3d</span></button>
+			<button><span>62</span><span>3e</span></button>
+			<button><span>63</span><span>3f</span></button>
+			<button><span>64</span><span>40</span></button>
+			<button><span>65</span><span>41</span></button>
+			<button><span>66</span><span>42</span></button>
+			<button><span>67</span><span>43</span></button>
+			<button><span>68</span><span>44</span></button>
+			<button><span>69</span><span>45</span></button>
+			<button><span>70</span><span>46</span></button>
+			<button><span>71</span><span>47</span></button>
+			<button><span>72</span><span>48</span></button>
+			<button><span>73</span><span>49</span></button>
+			<button><span>74</span><span>4a</span></button>
+			<button><span>75</span><span>4b</span></button>
+			<button><span>76</span><span>4c</span></button>
+			<button><span>77</span><span>4d</span></button>
+			<button><span>78</span><span>4e</span></button>
+			<button><span>79</span><span>4f</span></button>
+			<button><span>80</span><span>50</span></button>
+			<button><span>81</span><span>51</span></button>
+			<button><span>82</span><span>52</span></button>
+			<button><span>83</span><span>53</span></button>
+			<button><span>84</span><span>54</span></button>
+			<button><span>85</span><span>55</span></button>
+			<button><span>86</span><span>56</span></button>
+			<button><span>87</span><span>57</span></button>
+			<button><span>88</span><span>58</span></button>
+			<button><span>89</span><span>59</span></button>
+			<button><span>90</span><span>5a</span></button>
+			<button><span>91</span><span>5b</span></button>
+			<button><span>92</span><span>5c</span></button>
+			<button><span>93</span><span>5d</span></button>
+			<button><span>94</span><span>5e</span></button>
+			<button><span>95</span><span>5f</span></button>
+			<button><span>96</span><span>60</span></button>
+			<button><span>97</span><span>61</span></button>
+			<button><span>98</span><span>62</span></button>
+			<button><span>99</span><span>63</span></button>
+			<button><span>100</span><span>64</span></button>
+			<button><span>101</span><span>65</span></button>
+			<button><span>102</span><span>66</span></button>
+			<button><span>103</span><span>67</span></button>
+			<button><span>104</span><span>68</span></button>
+			<button><span>105</span><span>69</span></button>
+			<button><span>106</span><span>6a</span></button>
+			<button><span>107</span><span>6b</span></button>
+			<button><span>108</span><span>6c</span></button>
+			<button><span>109</span><span>6d</span></button>
+			<button><span>110</span><span>6e</span></button>
+			<button><span>111</span><span>6f</span></button>
+			<button><span>112</span><span>70</span></button>
+			<button><span>113</span><span>71</span></button>
+			<button><span>114</span><span>72</span></button>
+			<button><span>115</span><span>73</span></button>
+			<button><span>116</span><span>74</span></button>
+			<button><span>117</span><span>75</span></button>
+			<button><span>118</span><span>76</span></button>
+			<button><span>119</span><span>77</span></button>
+			<button><span>120</span><span>78</span></button>
+			<button><span>121</span><span>79</span></button>
+			<button><span>122</span><span>7a</span></button>
+			<button><span>123</span><span>7b</span></button>
+			<button><span>124</span><span>7c</span></button>
+			<button><span>125</span><span>7d</span></button>
+			<button><span>126</span><span>7e</span></button>
+		</ascii-keyboard>
 		<base-number></base-number>
 		<base64-converter></base64-converter>
 		<morse-code></morse-code>
 		<caesar-cipher></caesar-cipher>
+		<affine-cipher></affine-cipher>
 		<vigenere-cipher></vigenere-cipher>
 		<adfgvx-cipher></adfgvx-cipher>
 		<ango-config></ango-config>

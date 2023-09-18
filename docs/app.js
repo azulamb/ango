@@ -301,8 +301,15 @@ class ServiceWorkerManager {
             if (page) {
                 this.page = page;
             }
+            this.addEventListener('register', (event) => {
+                const target = event.target;
+                this.addContent(target.tagName, target);
+            }, true);
         }
         addContent(tag, content) {
+            tag = tag.replace(/[A-Z]/g, (char) => {
+                return String.fromCharCode(char.charCodeAt(0) | 32);
+            });
             const option = Common.option(content.name, tag).get();
             if (this.page === tag || (this.page === '' && tag === 'ango-config')) {
                 option.selected = true;
@@ -357,10 +364,38 @@ class ServiceWorkerManager {
     });
 });
 ((script, init) => {
-    if (document.readyState !== 'loading') {
-        return init(script);
+    customElements.whenDefined('ango-contents').then(() => {
+        init(script);
+    });
+})(document.currentScript, (script) => {
+    const tagname = 'number-list';
+    if (customElements.get(tagname)) {
+        return;
     }
-    document.addEventListener('DOMContentLoaded', () => {
+    customElements.define(tagname, class extends HTMLElement {
+        table;
+        get name() {
+            return 'Number list';
+        }
+        constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; }',
+                `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
+                '',
+            ].join('');
+            const contents = document.createElement('div');
+            contents.appendChild(document.createElement('slot'));
+            shadow.appendChild(style);
+            shadow.appendChild(contents);
+            this.dispatchEvent(new CustomEvent('register'));
+        }
+    });
+});
+((script, init) => {
+    customElements.whenDefined('ango-contents').then(() => {
         init(script);
     });
 })(document.currentScript, (script) => {
@@ -371,7 +406,7 @@ class ServiceWorkerManager {
     customElements.define(tagname, class extends HTMLElement {
         table;
         get name() {
-            return 'ASCII';
+            return 'ASCII Table';
         }
         constructor() {
             super();
@@ -474,7 +509,7 @@ class ServiceWorkerManager {
             const contents = Common.div(this.table, inputs).get();
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, this);
+            this.dispatchEvent(new CustomEvent('register'));
         }
         select(x, y) {
             for (const element of this.table.querySelectorAll('.selected')) {
@@ -491,10 +526,66 @@ class ServiceWorkerManager {
     });
 });
 ((script, init) => {
-    if (document.readyState !== 'loading') {
-        return init(script);
+    customElements.whenDefined('ango-contents').then(() => {
+        init(script);
+    });
+})(document.currentScript, (script) => {
+    const tagname = 'ascii-keyboard';
+    if (customElements.get(tagname)) {
+        return;
     }
-    document.addEventListener('DOMContentLoaded', () => {
+    customElements.define(tagname, class extends HTMLElement {
+        table;
+        get name() {
+            return 'ASCII Keyboard';
+        }
+        constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; }',
+                `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
+                ':host > div { display: grid; grid-template-rows: 2rem 1fr; grid-template-columns: calc(100% - 2rem) 2rem; }',
+                ':host > div > div:not(:last-child) { overflow: hidden; }',
+                ':host > div > div:not(:last-child) > slot { display: grid; width: 100%; height: 100%; }',
+                ':host > div > div:last-child { display: flex; flex-wrap: wrap; justify-content: center; width: 100%; grid-row: 2 / 3; grid-column: 1 / 3; }',
+            ].join('');
+            const result = document.createElement('div');
+            result.appendChild(((slot) => {
+                slot.name = 'result';
+                return slot;
+            })(document.createElement('slot')));
+            const clear = document.createElement('div');
+            clear.appendChild(((slot) => {
+                slot.name = 'clear';
+                return slot;
+            })(document.createElement('slot')));
+            const buttons = document.createElement('div');
+            buttons.appendChild(document.createElement('slot'));
+            const contents = document.createElement('div');
+            contents.appendChild(result);
+            contents.appendChild(clear);
+            contents.appendChild(buttons);
+            shadow.appendChild(style);
+            shadow.appendChild(contents);
+            ((input) => {
+                this.querySelector('button[slot="clear"]').addEventListener('click', () => {
+                    input.value = '';
+                });
+                this.querySelectorAll('button:not([slot])').forEach((button) => {
+                    const character = String.fromCharCode(parseInt(button.querySelector('span')?.textContent || '') || 0);
+                    button.addEventListener('click', () => {
+                        input.value += character;
+                    });
+                });
+            })(this.querySelector('input'));
+            this.dispatchEvent(new CustomEvent('register'));
+        }
+    });
+});
+((script, init) => {
+    customElements.whenDefined('ango-contents').then(() => {
         init(script);
     });
 })(document.currentScript, (script) => {
@@ -623,15 +714,12 @@ class ServiceWorkerManager {
             contents.appendChild(nums);
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, this);
+            this.dispatchEvent(new CustomEvent('register'));
         }
     });
 });
 ((script, init) => {
-    if (document.readyState !== 'loading') {
-        return init(script);
-    }
-    document.addEventListener('DOMContentLoaded', () => {
+    customElements.whenDefined('ango-contents').then(() => {
         init(script);
     });
 })(document.currentScript, (script) => {
@@ -799,7 +887,7 @@ class ServiceWorkerManager {
             contents.appendChild(dialog);
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, this);
+            this.dispatchEvent(new CustomEvent('register'));
         }
     });
 });
@@ -808,10 +896,7 @@ const Morse = {
     DASH: true,
 };
 ((script, init) => {
-    if (document.readyState !== 'loading') {
-        return init(script);
-    }
-    document.addEventListener('DOMContentLoaded', () => {
+    customElements.whenDefined('ango-contents').then(() => {
         init(script);
     });
 })(document.currentScript, (script) => {
@@ -1077,7 +1162,7 @@ const Morse = {
             const contents = Common.div(this.svg, this.morse, reset, this.text, preview, inputs).get();
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, this);
+            this.dispatchEvent(new CustomEvent('register'));
         }
         changeFromMorse() {
             this.text.value = this.morse.value.split(' ').map((morse) => {
@@ -1483,10 +1568,7 @@ const Morse = {
     });
 });
 ((script, init) => {
-    if (document.readyState !== 'loading') {
-        return init(script);
-    }
-    document.addEventListener('DOMContentLoaded', () => {
+    customElements.whenDefined('ango-contents').then(() => {
         init(script);
     });
 })(document.currentScript, (script) => {
@@ -1562,8 +1644,8 @@ const Morse = {
             const contents = Common.div(convertArea, table).get();
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, this);
             this.updateTable(0, [...'abcdefghijklmnopqrstuvwxyz']);
+            this.dispatchEvent(new CustomEvent('register'));
         }
         get mode() {
             return this.getAttribute('mode') === 'cipher' ? 'cipher' : 'raw';
@@ -1632,70 +1714,153 @@ const Morse = {
     });
 });
 ((script, init) => {
-    if (document.readyState !== 'loading') {
-        return init(script);
-    }
-    document.addEventListener('DOMContentLoaded', () => {
+    customElements.whenDefined('ango-contents').then(() => {
         init(script);
     });
 })(document.currentScript, (script) => {
-    const tagname = 'ango-config';
+    const tagname = 'affine-cipher';
     if (customElements.get(tagname)) {
         return;
     }
+    class Affine {
+        characters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+        setCharacters(characters) {
+            this.characters = [...characters];
+        }
+        encrypt(text, a, b) {
+            const m = this.characters.length;
+            const table = this.characters.map((char, index) => {
+                return this.characters[(a * index + b) % m];
+            });
+            return [...text].map((char) => {
+                const index = this.characters.indexOf(char);
+                if (index < 0) {
+                    return char;
+                }
+                return table[index];
+            }).join('');
+        }
+        decrypt(text, a, b) {
+            const m = this.characters.length;
+            const table = this.characters.map((char, index) => {
+                return this.characters[(a * index + b) % m];
+            });
+            return [...text].map((char) => {
+                const index = table.indexOf(char);
+                if (index < 0) {
+                    return char;
+                }
+                return this.characters[index];
+            }).join('');
+        }
+        toString() {
+            return this.characters.join('');
+        }
+    }
     customElements.define(tagname, class extends HTMLElement {
         get name() {
-            return 'Config';
+            return 'Affine Cipher';
         }
+        affine;
         constructor() {
             super();
+            this.affine = new Affine();
             const shadow = this.attachShadow({ mode: 'open' });
             const style = document.createElement('style');
             style.innerHTML = [
-                ':host { display: block; }',
-                `:host-context(ango-contents[page]) { display: none; }`,
-                'h1 { display: block; width: 4rem; height: 4rem; background: center no-repeat url(./favicon.svg); margin: 0.5rem auto; overflow: hidden; text-indent: 8rem; }',
-                'div, p { font-size: 1rem; margin: 0.5rem auto; width: 100%; max-width: 40rem; }',
+                ':host { display: block; width: 100%; height: 100%; }',
+                `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
+                ':host > div { width: 100%; height: 100%; display: grid; grid-template-columns: 2rem calc(50% - 3rem) 2rem 2rem calc(50% - 3rem); grid-template-rows: 1fr 1fr 3rem 3rem; grid-template-areas: "a a b c c" "a a d c c" "x f _ y g" "m e e e e"; overflow: hidden; }',
+                'input { font-size: 3rem; }',
+                'textarea { font-size: 3rem; }',
+                'span { font-size: 2rem; text-align: center; }',
+                ':host(:not([mode="cipher"])) #encryption, :host([mode="cipher"]) #decryption { background: #c3d0e5; }',
             ].join('');
-            const h1 = document.createElement('h1');
-            h1.textContent = 'ango';
-            const detail = Common.p('何らかの謎解き系の暗号解読に使えそうなツール群です。').get();
-            const dl = Common.dl().get();
-            dl.appendChild(Common.dt('Remove ServiceWorker.').get());
-            dl.appendChild(Common.dd(Common.button('Remove', () => {
-                ServiceWorkerManager.unregister();
-            }).get()).get());
-            dl.appendChild(Common.dt('Register ServiceWorker.').get());
-            dl.appendChild(Common.dd(Common.button('Register', () => {
-                ServiceWorkerManager.register();
-            }).get()).get());
-            function updateSwitch(enable) {
-                switchTitle.textContent = `Switch ServiceWorker. [${enable ? 'Enable' : 'Disable'}]`;
-                switchSW.textContent = enable ? 'Deactivate' : 'Activate';
-            }
-            const switchTitle = Common.dt('Switch ServiceWorker.').get();
-            const switchSW = Common.button('', () => {
-                updateSwitch(ServiceWorkerManager.toggle());
-            }).get();
-            updateSwitch(!ServiceWorkerManager.disableUser());
-            dl.appendChild(switchTitle);
-            dl.appendChild(Common.dd(switchSW).get());
-            const config = Common.div(dl).get();
-            const contents = Common.div().get();
-            contents.appendChild(h1);
-            contents.appendChild(detail);
-            contents.appendChild(config);
+            const update = () => {
+                const valueA = parseInt(a.value);
+                const valueB = parseInt(b.value);
+                if (this.mode === 'cipher') {
+                    rawText.value = this.affine.decrypt(cipherText.value, valueA, valueB);
+                }
+                else {
+                    cipherText.value = this.affine.encrypt(rawText.value, valueA, valueB);
+                }
+            };
+            const rawText = document.createElement('textarea');
+            rawText.style.gridArea = 'a';
+            rawText.placeholder = 'Text.';
+            const cipherText = document.createElement('textarea');
+            cipherText.style.gridArea = 'c';
+            cipherText.placeholder = 'Cipher text.';
+            const encryption = document.createElement('button');
+            encryption.style.gridArea = 'b';
+            encryption.textContent = '>';
+            encryption.id = 'encryption';
+            encryption.addEventListener('click', () => {
+                this.mode = 'raw';
+                update();
+            });
+            const decryption = document.createElement('button');
+            decryption.style.gridArea = 'd';
+            decryption.textContent = '<';
+            decryption.id = 'decryption';
+            decryption.addEventListener('click', () => {
+                this.mode = 'cipher';
+                update();
+            });
+            const characters = document.createElement('input');
+            characters.style.gridArea = 'e';
+            characters.value = this.affine.toString();
+            characters.addEventListener('change', () => {
+                this.affine.setCharacters(characters.value);
+                update();
+            });
+            const textM = document.createElement('span');
+            textM.style.gridArea = 'm';
+            textM.textContent = 'm';
+            const textA = document.createElement('span');
+            textA.style.gridArea = 'x';
+            textA.textContent = 'a';
+            const a = document.createElement('input');
+            a.style.gridArea = 'f';
+            a.type = 'number';
+            a.step = '1';
+            a.value = '1';
+            a.addEventListener('change', update);
+            const textB = document.createElement('span');
+            textB.style.gridArea = 'y';
+            textB.textContent = 'b';
+            const b = document.createElement('input');
+            b.style.gridArea = 'g';
+            b.type = 'number';
+            b.step = '1';
+            b.value = '1';
+            b.addEventListener('change', update);
+            const contents = document.createElement('div');
+            contents.appendChild(rawText);
+            contents.appendChild(encryption);
+            contents.appendChild(decryption);
+            contents.appendChild(cipherText);
+            contents.appendChild(textA);
+            contents.appendChild(a);
+            contents.appendChild(textB);
+            contents.appendChild(b);
+            contents.appendChild(textM);
+            contents.appendChild(characters);
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, this);
+            this.dispatchEvent(new CustomEvent('register'));
+        }
+        get mode() {
+            return this.getAttribute('mode') === 'cipher' ? 'cipher' : 'raw';
+        }
+        set mode(value) {
+            this.setAttribute('mode', value === 'cipher' ? 'cipher' : 'raw');
         }
     });
 });
 ((script, init) => {
-    if (document.readyState !== 'loading') {
-        return init(script);
-    }
-    document.addEventListener('DOMContentLoaded', () => {
+    customElements.whenDefined('ango-contents').then(() => {
         init(script);
     });
 })(document.currentScript, (script) => {
@@ -1712,7 +1877,7 @@ const Morse = {
         text;
         mode = false;
         get name() {
-            return 'VigenereCipher';
+            return 'Vigenere Cipher';
         }
         constructor() {
             super();
@@ -1766,7 +1931,7 @@ const Morse = {
             contents.appendChild(this.table);
             shadow.appendChild(style);
             shadow.appendChild(contents);
-            this.parentElement.addContent(tagname, this);
+            this.dispatchEvent(new CustomEvent('register'));
         }
         update() {
             const key = [...Common.toUpperCase(this.key.value)];
@@ -1791,10 +1956,7 @@ const Morse = {
     });
 });
 ((script, init) => {
-    if (document.readyState !== 'loading') {
-        return init(script);
-    }
-    document.addEventListener('DOMContentLoaded', () => {
+    customElements.whenDefined('ango-contents').then(() => {
         init(script);
     });
 })(document.currentScript, (script) => {
@@ -1885,7 +2047,7 @@ const Morse = {
             shadow.appendChild(style);
             shadow.appendChild(contents);
             shadow.appendChild(dialog);
-            this.parentElement.addContent(tagname, this);
+            this.dispatchEvent(new CustomEvent('register'));
         }
         update() {
             const values = {};
@@ -1957,6 +2119,63 @@ const Morse = {
                     return keys[key];
                 }).join('');
             }
+        }
+    });
+});
+((script, init) => {
+    customElements.whenDefined('ango-contents').then(() => {
+        init(script);
+    });
+})(document.currentScript, (script) => {
+    const tagname = 'ango-config';
+    if (customElements.get(tagname)) {
+        return;
+    }
+    customElements.define(tagname, class extends HTMLElement {
+        get name() {
+            return 'Config';
+        }
+        constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; }',
+                `:host-context(ango-contents[page]) { display: none; }`,
+                'h1 { display: block; width: 4rem; height: 4rem; background: center no-repeat url(./favicon.svg); margin: 0.5rem auto; overflow: hidden; text-indent: 8rem; }',
+                'div, p { font-size: 1rem; margin: 0.5rem auto; width: 100%; max-width: 40rem; }',
+            ].join('');
+            const h1 = document.createElement('h1');
+            h1.textContent = 'ango';
+            const detail = Common.p('何らかの謎解き系の暗号解読に使えそうなツール群です。').get();
+            const dl = Common.dl().get();
+            dl.appendChild(Common.dt('Remove ServiceWorker.').get());
+            dl.appendChild(Common.dd(Common.button('Remove', () => {
+                ServiceWorkerManager.unregister();
+            }).get()).get());
+            dl.appendChild(Common.dt('Register ServiceWorker.').get());
+            dl.appendChild(Common.dd(Common.button('Register', () => {
+                ServiceWorkerManager.register();
+            }).get()).get());
+            function updateSwitch(enable) {
+                switchTitle.textContent = `Switch ServiceWorker. [${enable ? 'Enable' : 'Disable'}]`;
+                switchSW.textContent = enable ? 'Deactivate' : 'Activate';
+            }
+            const switchTitle = Common.dt('Switch ServiceWorker.').get();
+            const switchSW = Common.button('', () => {
+                updateSwitch(ServiceWorkerManager.toggle());
+            }).get();
+            updateSwitch(!ServiceWorkerManager.disableUser());
+            dl.appendChild(switchTitle);
+            dl.appendChild(Common.dd(switchSW).get());
+            const config = Common.div(dl).get();
+            const contents = Common.div().get();
+            contents.appendChild(h1);
+            contents.appendChild(detail);
+            contents.appendChild(config);
+            shadow.appendChild(style);
+            shadow.appendChild(contents);
+            this.dispatchEvent(new CustomEvent('register'));
         }
     });
 });
