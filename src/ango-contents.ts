@@ -3,7 +3,6 @@ interface AngoElement extends HTMLElement {
 }
 
 interface AngoContentsElement extends HTMLElement {
-	addContent(tag: string, content: AngoElement): void;
 	page: string;
 }
 
@@ -61,9 +60,16 @@ interface AngoContentsElement extends HTMLElement {
 				if (page) {
 					this.page = page;
 				}
+				this.addEventListener('register', (event) => {
+					const target = <AngoElement> event.target;
+					this.addContent(target.tagName, target);
+				}, true);
 			}
 
 			addContent(tag: string, content: AngoElement) {
+				tag = tag.replace(/[A-Z]/g, (char) => {
+					return String.fromCharCode(char.charCodeAt(0) | 32);
+				});
 				const option = Common.option(content.name, tag).get();
 				if (this.page === tag || (this.page === '' && tag === 'ango-config')) {
 					option.selected = true;

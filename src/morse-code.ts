@@ -127,7 +127,7 @@ interface MorseCodeNode extends MorseNode {
 				shadow.appendChild(style);
 				shadow.appendChild(contents);
 
-				(<AngoContentsElement> this.parentElement).addContent(tagname, this);
+				this.dispatchEvent(new CustomEvent('register'));
 			}
 
 			protected changeFromMorse() {

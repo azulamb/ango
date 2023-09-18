@@ -3,24 +3,15 @@
 		"build": "tsc -p ./src"
 	},
 	"lint": {
-		"files": {
-			"include": ["./src"]
-		},
-		"rules": {
-			"tags": ["recommended"],
-			"include": [],
-			"exclude": ["require-await"]
-		}
+		"include": ["./src"],
+		"exclude": ["require-await"],
+		"tags": ["recommended"]
 	},
 	"fmt": {
-		"files": {
-			"include": ["./src"]
-		},
-		"options": {
-			"useTabs": true,
-			"indentWidth": 4,
-			"lineWidth": 160,
-			"singleQuote": true
-		}
+		"include": ["./src"],
+		"useTabs": true,
+		"indentWidth": 4,
+		"lineWidth": 160,
+		"singleQuote": true
 	}
 }

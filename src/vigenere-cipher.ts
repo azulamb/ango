@@ -1,8 +1,5 @@
 ((script, init) => {
-	if (document.readyState !== 'loading') {
-		return init(script);
-	}
-	document.addEventListener('DOMContentLoaded', () => {
+	customElements.whenDefined('ango-contents').then(() => {
 		init(script);
 	});
 })(<HTMLScriptElement> document.currentScript, (script: HTMLScriptElement) => {
@@ -23,7 +20,7 @@
 			protected mode = false;
 
 			get name() {
-				return 'VigenereCipher';
+				return 'Vigenere Cipher';
 			}
 
 			constructor() {
@@ -85,7 +82,7 @@
 				shadow.appendChild(style);
 				shadow.appendChild(contents);
 
-				(<AngoContentsElement> this.parentElement).addContent(tagname, this);
+				this.dispatchEvent(new CustomEvent('register'));
 			}
 
 			protected update() {

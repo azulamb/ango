@@ -22,10 +22,7 @@ const Morse = {
 };
 
 ((script, init) => {
-	if (document.readyState !== 'loading') {
-		return init(script);
-	}
-	document.addEventListener('DOMContentLoaded', () => {
+	customElements.whenDefined('ango-contents').then(() => {
 		init(script);
 	});
 })(<HTMLScriptElement> document.currentScript, (script: HTMLScriptElement) => {
