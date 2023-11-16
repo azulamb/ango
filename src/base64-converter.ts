@@ -61,14 +61,22 @@
 				];
 
 				// a[OOOOOO]b[OO----]
-				if (w < data.length) data[w++] = (a << 2) | (b >> 4);
+				if (w < data.length) {
+					data[w++] = (a << 2) | (b >> 4);
+				}
 				// b[--OOOO]c[OOOO--]
-				if (w < data.length && i + 2 < chars.length) data[w++] = ((b & 0xF) << 4) | (c >> 2);
+				if (w < data.length && i + 2 < chars.length) {
+					data[w++] = ((b & 0xF) << 4) | (c >> 2);
+				}
 				// c[----OO]d[OOOOOO]
-				if (w < data.length && i + 3 < chars.length) data[w++] = ((c & 0x3) << 6) | d;
+				if (w < data.length && i + 3 < chars.length) {
+					data[w++] = ((c & 0x3) << 6) | d;
+				}
 			}
 
-			if (w === data.length) return data;
+			if (w === data.length) {
+				return data;
+			}
 
 			const newData = new Uint8Array(w);
 			newData.set(data.slice(0, w));

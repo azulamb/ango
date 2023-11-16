@@ -6,6 +6,7 @@
 /// <reference path="./ascii-keyboard.ts" />
 /// <reference path="./base-number.ts" />
 /// <reference path="./base64-converter.ts" />
+/// <reference path="./base64-hex.ts" />
 /// <reference path="./morse-code.ts" />
 /// <reference path="./caesar-cipher.ts" />
 /// <reference path="./affine-cipher.ts" />

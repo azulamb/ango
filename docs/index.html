@@ -10,7 +10,14 @@
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<link rel="apple-touch-icon" sizes="152x152" href="./apple-touch-icon-precomposed.png">
 	<style>:root{--front:#333333;--back:#e6e6e6;}html{height:100%;font-size:3vw;touch-action:manipulation;}body{height:100%;margin:0;}</style>
-	<style>.monospace{font-family:monospace;}table{font-size:2rem;margin:auto;}h2{text-align:center;}button{cursor:pointer;font-size:1.5rem;line-height:1.5rem;}input{font-size:1.5rem;}input,button,textarea{outline:none;box-sizing:border-box;padding:0;}</style>
+	<style>
+.monospace{font-family:monospace;}
+table{font-size:2rem;margin:auto;}
+h2{text-align:center;}
+button{cursor:pointer;font-size:1.5rem;line-height:1.5rem;}
+input{font-size:1.5rem;}
+input,button,textarea{outline:none;box-sizing:border-box;padding:0;}
+	</style>
 	<style>ascii-keyboard button:not([slot]){display:grid;grid-template-rows:1rem 2rem;width:5rem;font-size:2rem;}ascii-keyboard button span{text-align:center;}ascii-keyboard button span:first-child{opacity:0.4;font-size:1rem;line-height:1em;}ascii-keyboard button span:last-child::before{content:'0x';opacity:0.2;font-size:1.5rem;}</style>
 	<script src="./app.js" data-sw="./sw.js" async></script>
 </head>
@@ -148,6 +155,9 @@
 		</ascii-keyboard>
 		<base-number></base-number>
 		<base64-converter></base64-converter>
+		<base64-hex>
+			<input slot="base64">
+		</base64-hex>
 		<morse-code></morse-code>
 		<caesar-cipher></caesar-cipher>
 		<affine-cipher></affine-cipher>
