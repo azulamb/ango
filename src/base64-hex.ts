@@ -100,6 +100,7 @@
 				const style = document.createElement('style');
 				style.innerHTML = [
 					':host { display: block; height: 100%; }',
+					`:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
 					'::slotted(input) { width: 100%; }',
 					'::slotted(span) { font-size: 1.5rem; display: inline-block; padding: 0.1rem 0.2rem; }',
 					'::slotted(span)::before { content: "0x"; }',
