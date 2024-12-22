@@ -972,6 +972,7 @@ class ServiceWorkerManager {
             const style = document.createElement('style');
             style.innerHTML = [
                 ':host { display: block; height: 100%; }',
+                `:host-context(ango-contents:not([page="${tagname}"])) { display: none; }`,
                 '::slotted(input) { width: 100%; }',
                 '::slotted(span) { font-size: 1.5rem; display: inline-block; padding: 0.1rem 0.2rem; }',
                 '::slotted(span)::before { content: "0x"; }',
@@ -996,7 +997,6 @@ class ServiceWorkerManager {
         }
         updateHex(data) {
             const items = [...this.querySelectorAll('span')];
-            console.log(items);
             let i = 0;
             for (; i < items.length && i < data.length; ++i) {
                 items[i].textContent = data[i].toString(16).padStart(2, '0');
